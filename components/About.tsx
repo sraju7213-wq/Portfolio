@@ -32,15 +32,12 @@ export default function About() {
           >
             <div className="relative w-48 h-48 sm:w-56 sm:h-56 mx-auto lg:mx-0">
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-accent-cyan/20 to-accent-violet/20 blur-xl" />
-              <div className="relative w-full h-full rounded-2xl gradient-border bg-bg-surface flex items-center justify-center">
-                <div className="text-center">
-                  <div className="font-heading text-5xl sm:text-6xl font-bold gradient-text leading-none">
-                    RS
-                  </div>
-                  <div className="text-text-muted text-xs tracking-widest uppercase mt-2">
-                    Portfolio
-                  </div>
-                </div>
+              <div className="relative w-full h-full rounded-2xl gradient-border bg-bg-surface overflow-hidden">
+                <img
+                  src="https://ik.imagekit.io/ceh1i98cy/dsfsd.jpg"
+                  alt="RAJU SHEIKH"
+                  className="w-full h-full object-cover"
+                />
               </div>
             </div>
 
