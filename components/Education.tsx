@@ -29,20 +29,27 @@ export default function Education() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.15 }}
-              className="bg-bg-card rounded-2xl p-6 lg:p-8 border border-border-subtle card-hover text-center"
+              whileHover={{ y: -6 }}
+              className="bg-bg-card rounded-2xl p-6 lg:p-8 border border-border-subtle text-center relative overflow-hidden group"
             >
-              <div className="w-14 h-14 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-accent-cyan/10 to-accent-violet/10 border border-accent-cyan/20 flex items-center justify-center">
-                <edu.icon size={24} className="text-accent-cyan" />
+              <div className="absolute inset-0 bg-gradient-to-br from-accent-cyan/[0.03] to-accent-violet/[0.03] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative">
+                <motion.div
+                  whileHover={{ rotate: 10, scale: 1.1 }}
+                  className="w-14 h-14 mx-auto mb-5 rounded-2xl bg-gradient-to-br from-accent-cyan/10 to-accent-violet/10 border border-accent-cyan/20 flex items-center justify-center"
+                >
+                  <edu.icon size={24} className="text-accent-cyan" />
+                </motion.div>
+                <h3 className="font-heading text-lg font-semibold text-text-primary mb-2">
+                  {edu.degree}
+                </h3>
+                <p className="text-text-secondary text-sm mb-3">
+                  {edu.institution}
+                </p>
+                <span className="inline-block px-3 py-1 rounded-lg bg-bg-elevated border border-border-subtle text-text-muted text-xs font-medium">
+                  {edu.year}
+                </span>
               </div>
-              <h3 className="font-heading text-lg font-semibold text-text-primary mb-2">
-                {edu.degree}
-              </h3>
-              <p className="text-text-secondary text-sm mb-3">
-                {edu.institution}
-              </p>
-              <span className="inline-block px-3 py-1 rounded-lg bg-bg-elevated border border-border-subtle text-text-muted text-xs font-medium">
-                {edu.year}
-              </span>
             </motion.div>
           ))}
         </div>

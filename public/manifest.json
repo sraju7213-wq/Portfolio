@@ -1,0 +1,28 @@
+{
+  "name": "RAJU SHEIKH Portfolio",
+  "short_name": "Raju Portfolio",
+  "description": "Creative Designer & Digital Strategist - Portfolio",
+  "theme_color": "#07070a",
+  "background_color": "#07070a",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28' font-weight='bold' fill='%2300e5ff'>R</text></svg>",
+      "sizes": "32x32",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%2307070a' width='180' height='180' rx='40'/><text y='140' font-size='120' font-weight='bold' fill='%2300e5ff'>R</text></svg>",
+      "sizes": "180x180",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect fill='%2307070a' width='512' height='512' rx='100'/><text y='400' font-size='350' font-weight='bold' fill='%2300e5ff'>R</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

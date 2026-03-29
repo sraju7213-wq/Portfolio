@@ -3,6 +3,72 @@ import { motion } from "framer-motion";
 import { Mail, Phone, MapPin, Send, CheckCircle } from "lucide-react";
 import { contact } from "../data/content";
 
+function AnimatedInput({
+  label,
+  type = "text",
+  required = false,
+  textarea = false,
+}: {
+  label: string;
+  type?: string;
+  required?: boolean;
+  textarea?: boolean;
+}) {
+  const [focused, setFocused] = useState(false);
+  const [hasValue, setHasValue] = useState(false);
+  const isActive = focused || hasValue;
+
+  const sharedClasses = `w-full px-4 rounded-xl bg-bg-primary border text-text-primary text-sm placeholder:text-transparent transition-all duration-300 focus:outline-none focus:ring-1 focus:ring-accent-cyan/20 ${
+    focused ? "border-accent-cyan/50 shadow-[0_0_20px_rgba(0,229,255,0.08)]" : "border-border-subtle"
+  }`;
+
+  return (
+    <div className="relative">
+      {textarea ? (
+        <textarea
+          required={required}
+          rows={5}
+          placeholder={label}
+          onFocus={() => setFocused(true)}
+          onBlur={(e) => {
+            setFocused(false);
+            setHasValue(!!e.target.value);
+          }}
+          className={`${sharedClasses} resize-none pt-5 pb-2`}
+        />
+      ) : (
+        <input
+          type={type}
+          required={required}
+          placeholder={label}
+          onFocus={() => setFocused(true)}
+          onBlur={(e) => {
+            setFocused(false);
+            setHasValue(!!e.target.value);
+          }}
+          className={`${sharedClasses} pt-5 pb-2`}
+        />
+      )}
+      <label
+        className={`absolute left-4 pointer-events-none transition-all duration-300 ${
+          isActive
+            ? "top-2.5 text-[10px] text-accent-cyan/70 tracking-wider uppercase"
+            : "top-1/2 -translate-y-1/2 text-sm text-text-muted/50"
+        }`}
+      >
+        {label}
+      </label>
+      {focused && (
+        <motion.div
+          layoutId="input-glow"
+          className="absolute inset-0 rounded-xl bg-accent-cyan/[0.03] pointer-events-none"
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        />
+      )}
+    </div>
+  );
+}
+
 export default function Contact() {
   const [submitted, setSubmitted] = useState(false);
 
@@ -56,6 +122,7 @@ export default function Contact() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: 0.2 + i * 0.1 }}
+                whileHover={{ x: 6 }}
                 className="flex items-center gap-4 bg-bg-card rounded-xl p-5 border border-border-subtle card-hover group"
               >
                 <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-accent-cyan/10 to-accent-violet/10 border border-accent-cyan/20 flex items-center justify-center shrink-0 group-hover:border-accent-cyan/40 transition-colors">
@@ -81,71 +148,44 @@ export default function Contact() {
               className="bg-bg-card rounded-2xl p-6 lg:p-8 border border-border-subtle space-y-5"
             >
               <div className="grid sm:grid-cols-2 gap-5">
-                <div>
-                  <label className="block text-text-muted text-xs mb-2 tracking-wide uppercase">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Your name"
-                    className="w-full px-4 py-3 rounded-xl bg-bg-primary border border-border-subtle text-text-primary text-sm placeholder:text-text-muted/50 focus:outline-none focus:border-accent-cyan/50 focus:ring-1 focus:ring-accent-cyan/20 transition-all"
-                  />
-                </div>
-                <div>
-                  <label className="block text-text-muted text-xs mb-2 tracking-wide uppercase">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    placeholder="you@email.com"
-                    className="w-full px-4 py-3 rounded-xl bg-bg-primary border border-border-subtle text-text-primary text-sm placeholder:text-text-muted/50 focus:outline-none focus:border-accent-cyan/50 focus:ring-1 focus:ring-accent-cyan/20 transition-all"
-                  />
-                </div>
+                <AnimatedInput label="Name" required />
+                <AnimatedInput label="Email" type="email" required />
               </div>
 
-              <div>
-                <label className="block text-text-muted text-xs mb-2 tracking-wide uppercase">
-                  Subject
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Project inquiry"
-                  className="w-full px-4 py-3 rounded-xl bg-bg-primary border border-border-subtle text-text-primary text-sm placeholder:text-text-muted/50 focus:outline-none focus:border-accent-cyan/50 focus:ring-1 focus:ring-accent-cyan/20 transition-all"
-                />
-              </div>
+              <AnimatedInput label="Subject" required />
+              <AnimatedInput label="Tell me about your project..." required textarea />
 
-              <div>
-                <label className="block text-text-muted text-xs mb-2 tracking-wide uppercase">
-                  Message
-                </label>
-                <textarea
-                  required
-                  rows={5}
-                  placeholder="Tell me about your project..."
-                  className="w-full px-4 py-3 rounded-xl bg-bg-primary border border-border-subtle text-text-primary text-sm placeholder:text-text-muted/50 focus:outline-none focus:border-accent-cyan/50 focus:ring-1 focus:ring-accent-cyan/20 transition-all resize-none"
-                />
-              </div>
-
-              <button
+              <motion.button
                 type="submit"
                 disabled={submitted}
-                className="w-full btn-primary flex items-center justify-center gap-2 py-4"
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full btn-primary flex items-center justify-center gap-2 py-4 relative overflow-hidden min-h-[48px]"
               >
                 {submitted ? (
-                  <>
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="flex items-center gap-2 relative z-10"
+                  >
                     <CheckCircle size={18} />
                     Message Sent!
-                  </>
+                  </motion.span>
                 ) : (
-                  <>
+                  <span className="flex items-center gap-2 relative z-10">
                     <Send size={18} />
                     Send Message
-                  </>
+                  </span>
                 )}
-              </button>
+                {!submitted && (
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-accent-violet to-accent-cyan"
+                    initial={{ x: "-100%" }}
+                    whileHover={{ x: "0%" }}
+                    transition={{ duration: 0.4 }}
+                  />
+                )}
+              </motion.button>
             </form>
           </motion.div>
         </div>

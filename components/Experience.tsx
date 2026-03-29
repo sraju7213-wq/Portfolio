@@ -33,11 +33,20 @@ export default function Experience() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ duration: 0.5, delay: i * 0.15 }}
-                className="relative pl-16 sm:pl-20"
+                className="relative pl-14 sm:pl-20"
               >
-                <div className="absolute left-4 sm:left-6 top-2 w-4 h-4 rounded-full bg-bg-card border-2 border-accent-cyan shadow-lg shadow-accent-cyan/20" />
+                <motion.div
+                  whileInView={{ scale: [0, 1.2, 1] }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: i * 0.15 }}
+                  className="absolute left-3 sm:left-6 top-2 w-4 h-4 rounded-full bg-bg-card border-2 border-accent-cyan shadow-lg shadow-accent-cyan/20"
+                />
 
-                <div className="bg-bg-card rounded-2xl p-6 lg:p-8 border border-border-subtle card-hover">
+                <div className="bg-bg-card rounded-2xl p-6 lg:p-8 border border-border-subtle card-hover relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-gradient-to-br from-accent-cyan/[0.02] to-accent-violet/[0.02] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute top-0 left-0 w-1 h-0 group-hover:h-full bg-gradient-to-b from-accent-cyan to-accent-violet transition-all duration-500" />
+                  <div className="absolute -right-8 -bottom-8 w-24 h-24 rounded-full bg-accent-cyan/[0.03] blur-2xl group-hover:bg-accent-cyan/[0.06] transition-all duration-500" />
+
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
                     <div>
                       <h3 className="font-heading text-lg font-semibold text-text-primary">

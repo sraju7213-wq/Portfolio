@@ -1,10 +1,11 @@
 import { motion } from "framer-motion";
-import { User } from "lucide-react";
 import { about } from "../data/content";
 
 export default function About() {
   return (
-    <section id="about" className="py-24 lg:py-32 relative">
+    <section id="about" className="py-24 lg:py-32 relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-[400px] h-[400px] rounded-full bg-accent-violet/[0.03] blur-[120px]" />
+
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -30,8 +31,12 @@ export default function About() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="lg:col-span-2"
           >
-            <div className="relative w-48 h-48 sm:w-56 sm:h-56 mx-auto lg:mx-0">
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-accent-cyan/20 to-accent-violet/20 blur-xl" />
+            <motion.div
+              whileHover={{ scale: 1.03 }}
+              transition={{ type: "spring", stiffness: 200 }}
+              className="relative w-48 h-48 sm:w-56 sm:h-56 mx-auto lg:mx-0"
+            >
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-accent-cyan/20 to-accent-violet/20 blur-xl animate-pulse-glow" />
               <div className="relative w-full h-full rounded-2xl gradient-border bg-bg-surface overflow-hidden">
                 <img
                   src="https://ik.imagekit.io/ceh1i98cy/dsfsd.jpg"
@@ -39,9 +44,9 @@ export default function About() {
                   className="w-full h-full object-cover"
                 />
               </div>
-            </div>
+            </motion.div>
 
-            <div className="grid grid-cols-2 gap-4 mt-8 max-w-sm mx-auto lg:mx-0">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 mt-8 max-w-sm mx-auto lg:mx-0">
               {about.stats.map((stat, i) => (
                 <motion.div
                   key={stat.label}
@@ -49,12 +54,16 @@ export default function About() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.4, delay: 0.3 + i * 0.1 }}
-                  className="bg-bg-card rounded-xl p-4 border border-border-subtle text-center card-hover"
+                  whileHover={{ y: -4, scale: 1.02 }}
+                  className="bg-bg-card rounded-xl p-4 border border-border-subtle text-center relative overflow-hidden group"
                 >
-                  <div className="font-heading text-2xl font-bold gradient-text">
-                    {stat.value}
+                  <div className="absolute inset-0 bg-gradient-to-br from-accent-cyan/[0.03] to-accent-violet/[0.03] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="relative">
+                    <div className="font-heading text-2xl font-bold gradient-text">
+                      {stat.value}
+                    </div>
+                    <div className="text-text-muted text-xs mt-1">{stat.label}</div>
                   </div>
-                  <div className="text-text-muted text-xs mt-1">{stat.label}</div>
                 </motion.div>
               ))}
             </div>
@@ -69,9 +78,16 @@ export default function About() {
           >
             <div className="space-y-5 text-text-secondary leading-relaxed">
               {about.bio.split("\n\n").map((paragraph, i) => (
-                <p key={i} className="text-sm sm:text-base">
+                <motion.p
+                  key={i}
+                  initial={{ opacity: 0, y: 15 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: 0.3 + i * 0.15 }}
+                  className="text-sm sm:text-base"
+                >
                   {paragraph}
-                </p>
+                </motion.p>
               ))}
             </div>
           </motion.div>

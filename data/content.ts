@@ -322,6 +322,12 @@ export const portfolioProjects = [
 
 export const education = [
   {
+    degree: "Bachelor of Arts (BA)",
+    institution: "Indira Gandhi National Open University (IGNOU)",
+    year: "2025",
+    icon: GraduationCap,
+  },
+  {
     degree: "Senior Secondary (12th)",
     institution: "National Institute of Open Schooling (NIOS)",
     year: "Completed",

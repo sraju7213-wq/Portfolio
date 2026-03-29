@@ -9,12 +9,14 @@ const socialLinks = [
 
 export default function Footer() {
   return (
-    <footer className="py-12 border-t border-border-subtle">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+    <footer className="py-12 border-t border-border-subtle relative overflow-hidden">
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] rounded-full bg-accent-cyan/[0.02] blur-[150px]" />
+
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 relative">
         <div className="flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="text-center md:text-left">
             <a href="#" className="font-heading text-lg font-bold">
-              <span className="gradient-text">RAJU</span>
+              <span className="gradient-text-shimmer">RAJU</span>
               <span className="text-text-primary ml-1">SHEIKH</span>
             </a>
             <p className="text-text-muted text-sm mt-2 max-w-xs">
@@ -27,24 +29,26 @@ export default function Footer() {
               <a
                 key={link.href}
                 href={link.href}
-                className="text-text-muted text-sm hover:text-accent-cyan transition-colors duration-300"
+                className="text-text-muted text-sm hover:text-accent-cyan transition-colors duration-300 relative group"
               >
                 {link.label}
+                <span className="absolute -bottom-1 left-0 w-0 h-px bg-accent-cyan transition-all duration-300 group-hover:w-full" />
               </a>
             ))}
           </div>
 
           <div className="flex items-center gap-3">
-            {socialLinks.map((social) => (
-              <a
+            {socialLinks.map((social, i) => (
+              <motion.a
                 key={social.url}
                 href={social.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-xl bg-bg-card border border-border-subtle flex items-center justify-center text-text-muted hover:text-accent-cyan hover:border-accent-cyan/30 transition-all duration-300 card-hover"
+                whileHover={{ y: -3, scale: 1.05 }}
+                className="w-10 h-10 rounded-xl bg-bg-card border border-border-subtle flex items-center justify-center text-text-muted hover:text-accent-cyan hover:border-accent-cyan/30 transition-all duration-300"
               >
                 <social.icon size={16} />
-              </a>
+              </motion.a>
             ))}
           </div>
         </div>

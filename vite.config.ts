@@ -16,5 +16,19 @@ export default defineConfig({
   build: {
     cssCodeSplit: true,
     reportCompressedSize: false,
+    minify: "esbuild",
+    target: "esnext",
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "framer-motion": ["framer-motion"],
+          "react-vendor": ["react", "react-dom"],
+          "lucide": ["lucide-react"],
+        },
+      },
+    },
+  },
+  optimizeDeps: {
+    include: ["react", "react-dom", "framer-motion", "lucide-react"],
   },
 });
