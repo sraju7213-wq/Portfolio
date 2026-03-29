@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
 import Navbar from "./components/Navbar";
+import DualHero from "./components/DualHero";
 import Hero from "./components/Hero";
 import About from "./components/About";
 import Skills from "./components/Skills";
@@ -34,9 +35,11 @@ export default function App() {
       <Navbar />
       <main>
         <Suspense fallback={<LoadingFallback />}>
-          <FloatingParticles />
+          <div className="hidden md:block">
+            <FloatingParticles />
+          </div>
         </Suspense>
-        <Hero />
+        <DualHero />
         <About />
         <Suspense fallback={<LoadingFallback />}>
           <Services />

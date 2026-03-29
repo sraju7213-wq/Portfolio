@@ -42,6 +42,8 @@ export default function About() {
                   src="https://ik.imagekit.io/ceh1i98cy/dsfsd.jpg"
                   alt="RAJU SHEIKH"
                   className="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
                 />
               </div>
             </motion.div>

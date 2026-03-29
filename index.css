@@ -234,8 +234,31 @@
   }
 
   .btn-primary:hover {
-    box-shadow: 0 0 30px rgba(0, 229, 255, 0.3), 0 0 60px rgba(139, 92, 246, 0.15);
+    box-shadow: 0 0 30px rgba(139, 92, 246, 0.3), 0 0 60px rgba(168, 85, 247, 0.15);
     transform: translateY(-2px);
+  }
+
+  .btn-primary-minimal {
+    @apply inline-flex items-center justify-center px-6 py-3 rounded-lg text-sm font-medium transition-all duration-300;
+    background: white;
+    color: #07070a;
+  }
+
+  .btn-primary-minimal:hover {
+    background: #f5f5f5;
+    transform: translateY(-1px);
+  }
+
+  .btn-primary-minimal-violet {
+    @apply inline-flex items-center justify-center px-6 py-3 rounded-lg text-sm font-medium transition-all duration-300;
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    color: white;
+  }
+
+  .btn-primary-minimal-violet:hover {
+    background: linear-gradient(135deg, #9f7aea, #8b5cf6);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
   }
 
   .btn-secondary {

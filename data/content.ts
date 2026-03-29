@@ -18,8 +18,28 @@ export const navLinks = [
 
 export const hero = {
   name: "RAJU SHEIKH",
-  headline: "Creative Designer & Web Developer",
-  subtitle: "Managing visual identity across 8+ brands under Ms Cottage — from e-commerce and hospitality to AI-generated cinematic art. A multi-disciplinary creative building brands that connect, convert, and inspire.",
+  headline: "I build high-performance web experiences that feel fast, look premium, and convert.",
+  subtitle: "Full-stack developer specializing in modern web apps, UI/UX-focused design, and scalable solutions.",
+  ctaPrimary: "View Projects",
+  ctaSecondary: "Hire Me",
+  availability: "Available for freelance & full-time opportunities",
+};
+
+export const dualHero = {
+  designer: {
+    label: "GRAPHIC DESIGNER",
+    headline: "Crafting bold, high-impact visual identities.",
+    subheadline: "Branding, social media creatives, and visual systems designed to stand out and perform.",
+    cta: "View Designs",
+    filter: "Graphics",
+  },
+  developer: {
+    label: "AI WEB CREATOR",
+    headline: "Building modern websites powered by AI.",
+    subheadline: "Fast, scalable, and visually refined websites — delivered using advanced AI workflows.",
+    cta: "View Projects",
+    trustLine: "AI-assisted development • No-code workflows • Production-ready results",
+  },
 };
 
 export const about = {
@@ -344,7 +364,7 @@ export const education = [
 export const contact = {
   email: "sraju7213@gmail.com",
   phone: "+91-9205171767",
-  location: "India",
+  location: "New Delhi, India",
   socials: [
     { platform: "Instagram — kreative.ai", url: "https://www.instagram.com/kreative.ai" },
     { platform: "Instagram — depressed_rtist", url: "https://www.instagram.com/depressed_rtist" },

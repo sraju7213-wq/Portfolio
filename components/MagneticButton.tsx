@@ -6,11 +6,13 @@ export default function MagneticButton({
   className = "",
   href,
   onClick,
+  style,
 }: {
   children: React.ReactNode;
   className?: string;
   href?: string;
   onClick?: () => void;
+  style?: React.CSSProperties;
 }) {
   const ref = useRef<HTMLAnchorElement>(null);
   const [pos, setPos] = useState({ x: 0, y: 0 });
@@ -50,6 +52,7 @@ export default function MagneticButton({
       animate={isTouch ? {} : { x: pos.x, y: pos.y }}
       transition={isTouch ? {} : { type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
       className={className}
+      style={style}
     >
       {children}
     </motion.a>

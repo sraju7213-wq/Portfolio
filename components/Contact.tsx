@@ -79,9 +79,9 @@ export default function Contact() {
   };
 
   const contactInfo = [
-    { icon: Mail, label: "Email", value: contact.email, href: `mailto:${contact.email}` },
-    { icon: Phone, label: "Phone", value: contact.phone, href: `tel:${contact.phone}` },
-    { icon: MapPin, label: "Location", value: contact.location, href: "#" },
+    { icon: Mail, label: "Email", value: contact.email, href: `mailto:${contact.email}`, external: false },
+    { icon: Phone, label: "Phone", value: contact.phone, href: `tel:${contact.phone}`, external: false },
+    { icon: MapPin, label: "Location", value: contact.location, href: "https://maps.google.com/?q=New+Delhi,+India", external: true },
   ];
 
   return (
@@ -118,6 +118,8 @@ export default function Contact() {
               <motion.a
                 key={item.label}
                 href={item.href}
+                target={item.external ? "_blank" : undefined}
+                rel={item.external ? "noopener noreferrer" : undefined}
                 initial={{ opacity: 0, y: 15 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}

@@ -28,10 +28,9 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16 lg:h-20">
           <a
             href="#"
-            className="font-heading text-xl font-bold tracking-tight"
+            className="font-heading text-lg font-semibold tracking-tight text-white"
           >
-            <span className="gradient-text-shimmer">RAJU</span>
-            <span className="text-text-primary ml-1">SHEIKH</span>
+            RAJU<span className="text-text-secondary">SHEIKH</span>
           </a>
 
           <div className="hidden md:flex items-center gap-1">
@@ -42,10 +41,9 @@ export default function Navbar() {
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 2.2 + i * 0.05 }}
-                className="px-4 py-2 text-sm font-medium text-text-secondary hover:text-text-primary transition-colors duration-300 rounded-lg hover:bg-white/5 relative group"
+                className="px-4 py-2 text-sm font-medium text-text-secondary hover:text-white transition-colors duration-300 rounded-lg hover:bg-white/5"
               >
                 {link.label}
-                <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-px bg-accent-cyan transition-all duration-300 group-hover:w-3/4" />
               </motion.a>
             ))}
           </div>
@@ -55,9 +53,9 @@ export default function Navbar() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 2.8 }}
-            className="hidden md:inline-flex btn-primary text-xs px-6 py-2.5"
+            className="hidden md:inline-flex items-center justify-center px-5 py-2 text-sm font-medium text-white bg-white/10 border border-white/10 rounded-lg hover:bg-white/15 hover:border-white/20 transition-all duration-300"
           >
-            <span>Let's Talk</span>
+            Let's Talk
           </motion.a>
 
           <button
@@ -95,9 +93,9 @@ export default function Navbar() {
               <a
                 href="#contact"
                 onClick={() => setMobileOpen(false)}
-                className="block mt-3 btn-primary text-center text-xs"
+                className="block mt-3 text-center px-5 py-3 text-sm font-medium text-white bg-white/10 border border-white/10 rounded-lg hover:bg-white/15 transition-all duration-300"
               >
-                <span>Let's Talk</span>
+                Let's Talk
               </a>
             </div>
           </motion.div>
