@@ -26,20 +26,33 @@ export const hero = {
 };
 
 export const dualHero = {
-  designer: {
-    label: "GRAPHIC DESIGNER",
-    headline: "Crafting bold, high-impact visual identities.",
-    subheadline: "Branding, social media creatives, and visual systems designed to stand out and perform.",
-    cta: "View Designs",
-    filter: "Graphics",
-  },
   developer: {
-    label: "AI WEB CREATOR",
-    headline: "Building modern websites powered by AI.",
-    subheadline: "Fast, scalable, and visually refined websites — delivered using advanced AI workflows.",
-    cta: "View Projects",
-    trustLine: "AI-assisted development • No-code workflows • Production-ready results",
+    label: "WEB DEVELOPMENT",
+    headline: "Building Smart Digital Experiences",
+    subheadline: "AI-powered websites, modern UI systems, and performance-focused builds.",
+    bulletPoints: [
+      "Frontend Systems",
+      "AI-Assisted Development",
+      "Responsive & Performance Optimization",
+      "Landing Pages & Funnels",
+      "Portfolio & Business Websites",
+    ],
+    cta: "View Web Projects",
   },
+  designer: {
+    label: "GRAPHIC DESIGN",
+    headline: "Crafting Visual Stories That Sell",
+    subheadline: "Brand identity, AI-enhanced visuals, and high-impact marketing creatives.",
+    bulletPoints: [
+      "Brand Identity",
+      "Social Media Creatives",
+      "AI Image Generation",
+      "Product & eCommerce Visuals",
+      "Print & Digital Design",
+    ],
+    cta: "Explore Designs",
+  },
+  centerTagline: "Where creativity meets AI-driven development",
 };
 
 export const about = {
@@ -215,7 +228,7 @@ export const brands = [
     icon: Sailboat,
     color: "from-teal-500/15 to-emerald-500/15",
     accent: "#14b8a6",
-    links: [{ label: "Instagram", url: "https://www.instagram.com/houseboat_holidays_kashmir" }],
+    links: [{ label: "Instagram", url: "https://www.instagram.com/houseboat_holidays_kashmir/" }],
   },
   {
     name: "Bliss of Wellness",
@@ -277,9 +290,9 @@ export const portfolioProjects = [
     featured: true,
   },
   {
-    title: "Houseboat Holidays — Website",
-    category: "Web Dev",
-    description: "Built a complete digital presence for a Kashmiri houseboat brand with gallery, booking integration, and immersive visual design.",
+    title: "Houseboat Holidays — Instagram",
+    category: "Social Media",
+    description: "Managing Instagram presence for a Kashmiri houseboat brand with engaging content, visual storytelling, and audience growth.",
     color: "from-teal-500/20 to-emerald-500/20",
   },
   {

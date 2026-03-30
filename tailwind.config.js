@@ -31,6 +31,7 @@ export default {
       },
       fontFamily: {
         heading: ['"Clash Display"', 'Inter', 'sans-serif'],
+        display: ['"Playfair Display"', 'Georgia', 'serif'],
         body: ['Inter', 'sans-serif'],
       },
       keyframes: {

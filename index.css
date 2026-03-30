@@ -376,3 +376,173 @@
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
+
+@layer components {
+  .hero-grid-bg {
+    background-image:
+      linear-gradient(rgba(0, 229, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  .hero-grid-bg-hover {
+    background-image:
+      linear-gradient(rgba(0, 229, 255, 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 229, 255, 0.06) 1px, transparent 1px);
+    background-size: 60px 60px;
+    transition: background 0.8s ease;
+  }
+
+  .hero-divider-gradient {
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(139, 92, 246, 0.08) 30%,
+      rgba(0, 229, 255, 0.06) 50%,
+      rgba(139, 92, 246, 0.08) 70%,
+      transparent 100%
+    );
+    filter: blur(40px);
+  }
+
+  .hero-glow-dev {
+    background: radial-gradient(
+      600px circle at 30% 50%,
+      rgba(0, 229, 255, 0.06),
+      transparent 60%
+    );
+    transition: opacity 0.6s ease;
+  }
+
+  .hero-glow-design {
+    background: radial-gradient(
+      600px circle at 70% 50%,
+      rgba(139, 92, 246, 0.06),
+      transparent 60%
+    );
+    transition: opacity 0.6s ease;
+  }
+
+  .hero-orb-dev {
+    background: radial-gradient(circle, rgba(0, 229, 255, 0.12) 0%, transparent 70%);
+    filter: blur(80px);
+  }
+
+  .hero-orb-design {
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.12) 0%, transparent 70%);
+    filter: blur(80px);
+  }
+
+  .hero-orb-warm {
+    background: radial-gradient(circle, rgba(236, 72, 153, 0.08) 0%, transparent 70%);
+    filter: blur(100px);
+  }
+
+  .hero-bullet {
+    @apply flex items-center gap-3 text-sm;
+    color: #8b8b94;
+    transition: color 0.3s ease;
+  }
+
+  .hero-bullet:hover {
+    color: #ffffff;
+  }
+
+  .hero-bullet-dot {
+    @apply w-1.5 h-1.5 rounded-full flex-shrink-0;
+    background: currentColor;
+    opacity: 0.5;
+  }
+
+  .hero-bullet-icon {
+    @apply w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0;
+    transition: all 0.3s ease;
+  }
+
+  .hero-bullet-icon-dev {
+    background: rgba(0, 229, 255, 0.08);
+    border: 1px solid rgba(0, 229, 255, 0.1);
+  }
+
+  .hero-bullet-icon-dev:hover {
+    background: rgba(0, 229, 255, 0.15);
+    border-color: rgba(0, 229, 255, 0.25);
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.1);
+  }
+
+  .hero-bullet-icon-design {
+    background: rgba(139, 92, 246, 0.08);
+    border: 1px solid rgba(139, 92, 246, 0.1);
+  }
+
+  .hero-bullet-icon-design:hover {
+    background: rgba(139, 92, 246, 0.15);
+    border-color: rgba(139, 92, 246, 0.25);
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.1);
+  }
+
+  .hero-label-dev {
+    @apply inline-flex items-center gap-2 text-xs font-medium tracking-[0.2em] uppercase;
+    color: rgba(0, 229, 255, 0.7);
+  }
+
+  .hero-label-design {
+    @apply inline-flex items-center gap-2 text-xs font-medium tracking-[0.2em] uppercase;
+    color: rgba(139, 92, 246, 0.7);
+  }
+
+  .hero-btn-dev {
+    @apply inline-flex items-center justify-center px-7 py-3.5 rounded-lg text-sm font-medium transition-all duration-300;
+    background: white;
+    color: #07070a;
+  }
+
+  .hero-btn-dev:hover {
+    background: #f0f0f0;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0, 229, 255, 0.15), 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  .hero-btn-design {
+    @apply inline-flex items-center justify-center px-7 py-3.5 rounded-lg text-sm font-medium transition-all duration-300;
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    color: white;
+  }
+
+  .hero-btn-design:hover {
+    background: linear-gradient(135deg, #a78bfa, #8b5cf6);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(139, 92, 246, 0.25), 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  .hero-abstract-shape {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.4;
+    mix-blend-mode: screen;
+  }
+
+  .hero-center-tagline {
+    @apply text-xs tracking-[0.15em] uppercase whitespace-nowrap;
+    color: rgba(255, 255, 255, 0.2);
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+  }
+
+  @media (max-width: 768px) {
+    .hero-center-tagline {
+      writing-mode: horizontal-tb;
+    }
+  }
+
+  .hero-divider-line {
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(139, 92, 246, 0.2) 20%,
+      rgba(0, 229, 255, 0.15) 50%,
+      rgba(139, 92, 246, 0.2) 80%,
+      transparent 100%
+    );
+  }
+}
