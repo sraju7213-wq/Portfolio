@@ -594,6 +594,8 @@ export const portfolioProjects: PortfolioProject[] = [
     category: "Social Media",
     description: "Managing Instagram presence for a Kashmiri houseboat brand with engaging content, visual storytelling, and audience growth.",
     color: "from-teal-500/20 to-emerald-500/20",
+    featured: false,
+    tags: ["Instagram", "Content Strategy", "Visual Design", "Brand Growth"],
   },
   {
     title: "Tree of Life Cafe",
