@@ -1,28 +1,49 @@
 {
-  "name": "RAJU SHEIKH Portfolio",
-  "short_name": "Raju Portfolio",
-  "description": "Creative Designer & Digital Strategist - Portfolio",
-  "theme_color": "#07070a",
-  "background_color": "#07070a",
+  "name": "RAJU SHEIKH - Creative Designer & AI Web Developer",
+  "short_name": "Raju Sheikh",
+  "description": "Creative Designer and AI Web Developer portfolio - Building high-performance web experiences that feel fast, look premium, and convert.",
+  "start_url": "/",
   "display": "standalone",
+  "background_color": "#07070a",
+  "theme_color": "#00e5ff",
   "orientation": "portrait-primary",
   "scope": "/",
-  "start_url": "/",
+  "lang": "en",
+  "categories": ["portfolio", "design", "development", "creative"],
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28' font-weight='bold' fill='%2300e5ff'>R</text></svg>",
-      "sizes": "32x32",
-      "type": "image/svg+xml"
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     },
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%2307070a' width='180' height='180' rx='40'/><text y='140' font-size='120' font-weight='bold' fill='%2300e5ff'>R</text></svg>",
-      "sizes": "180x180",
-      "type": "image/svg+xml"
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
     },
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect fill='%2307070a' width='512' height='512' rx='100'/><text y='400' font-size='350' font-weight='bold' fill='%2300e5ff'>R</text></svg>",
+      "src": "/icon-512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml"
+      "type": "image/png"
     }
-  ]
+  ],
+  "shortcuts": [
+    {
+      "name": "View Portfolio",
+      "short_name": "Portfolio",
+      "description": "View my creative work and projects",
+      "url": "/#portfolio",
+      "icons": [{ "src": "/favicon.svg", "sizes": "96x96" }]
+    },
+    {
+      "name": "Contact Me",
+      "short_name": "Contact",
+      "description": "Get in touch for collaboration",
+      "url": "/#contact",
+      "icons": [{ "src": "/favicon.svg", "sizes": "96x96" }]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
 }

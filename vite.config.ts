@@ -7,17 +7,24 @@ export default defineConfig({
     port: 3000,
     host: "0.0.0.0",
   },
-  plugins: [react()],
+  plugins: [
+    react({
+      include: "**/*.{jsx,tsx}",
+    }),
+  ],
   resolve: {
     alias: {
       "@": path.resolve("."),
     },
+    extensions: [".mjs", ".js", ".ts", ".jsx", ".tsx", ".json"],
   },
   build: {
     cssCodeSplit: true,
-    reportCompressedSize: false,
+    reportCompressedSize: true,
     minify: "esbuild",
     target: "esnext",
+    sourcemap: false,
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
         manualChunks: {
@@ -25,10 +32,19 @@ export default defineConfig({
           "react-vendor": ["react", "react-dom"],
           "lucide": ["lucide-react"],
         },
+        chunkFileNames: "assets/[name]-[hash].js",
+        entryFileNames: "assets/[name]-[hash].js",
+        assetFileNames: "assets/[name]-[hash].[ext]",
+        compact: true,
+        experimentalMinChunkSize: 50000,
       },
     },
   },
   optimizeDeps: {
     include: ["react", "react-dom", "framer-motion", "lucide-react"],
+    exclude: [],
+  },
+  css: {
+    devSourcemap: true,
   },
 });

@@ -1,0 +1,14 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://raju-sheikh.dev/sitemap.xml
+
+# Crawl-delay for polite bots
+Crawl-delay: 1
+
+# Block common bot traps and admin areas
+Disallow: /api/
+Disallow: /*.json$
+Disallow: /admin

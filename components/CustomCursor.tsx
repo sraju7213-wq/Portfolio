@@ -1,85 +1,168 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useCallback } from "react";
+import { motion, useMotionValue, useSpring } from "framer-motion";
 
 export default function CustomCursor() {
-  const dotRef = useRef<HTMLDivElement>(null);
+  const cursorX = useMotionValue(-100);
+  const cursorY = useMotionValue(-100);
   const ringRef = useRef<HTMLDivElement>(null);
-  const [hovering, setHovering] = useState(false);
-  const [clicking, setClicking] = useState(false);
-  const mousePos = useRef({ x: -100, y: -100 });
-  const ringPos = useRef({ x: -100, y: -100 });
-  const rafId = useRef<number>(0);
+  const glowRef = useRef<HTMLDivElement>(null);
+  const dotRef = useRef<HTMLDivElement>(null);
+  const isHoveringRef = useRef(false);
+
+  const springConfig = { stiffness: 200, damping: 18, mass: 0.08 };
+  const springX = useSpring(cursorX, springConfig);
+  const springY = useSpring(cursorY, springConfig);
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    cursorX.set(e.clientX);
+    cursorY.set(e.clientY);
+  }, [cursorX, cursorY]);
+
+  const handleMouseOver = useCallback((e: MouseEvent) => {
+    const target = (e.target as HTMLElement).closest(
+      'a, button, [role="button"], input, textarea, select, [data-cursor]'
+    );
+    if (!target) return;
+    isHoveringRef.current = true;
+
+    if (ringRef.current) {
+      ringRef.current.style.width = "48px";
+      ringRef.current.style.height = "48px";
+      ringRef.current.style.borderColor = "rgba(255, 255, 255, 0.5)";
+      ringRef.current.style.background = "rgba(255, 255, 255, 0.04)";
+      ringRef.current.style.boxShadow = "0 0 24px rgba(255, 255, 255, 0.08)";
+    }
+
+    if (dotRef.current) {
+      dotRef.current.style.background = "rgba(255, 255, 255, 1)";
+      dotRef.current.style.boxShadow = "0 0 12px rgba(255, 255, 255, 0.5)";
+    }
+
+    if (glowRef.current) {
+      glowRef.current.style.opacity = "0.6";
+      glowRef.current.style.transform = "scale(1.5)";
+    }
+  }, []);
+
+  const handleMouseOut = useCallback(() => {
+    if (!isHoveringRef.current) return;
+    isHoveringRef.current = false;
+
+    if (ringRef.current) {
+      ringRef.current.style.width = "32px";
+      ringRef.current.style.height = "32px";
+      ringRef.current.style.borderColor = "rgba(255, 255, 255, 0.25)";
+      ringRef.current.style.background = "transparent";
+      ringRef.current.style.boxShadow = "0 0 16px rgba(255, 255, 255, 0.06)";
+    }
+
+    if (dotRef.current) {
+      dotRef.current.style.background = "rgba(255, 255, 255, 0.85)";
+      dotRef.current.style.boxShadow = "0 0 8px rgba(255, 255, 255, 0.3)";
+    }
+
+    if (glowRef.current) {
+      glowRef.current.style.opacity = "0.35";
+      glowRef.current.style.transform = "scale(1)";
+    }
+  }, []);
+
+  const handleClick = useCallback(() => {
+    if (ringRef.current) {
+      ringRef.current.style.transform = "scale(0.75)";
+      ringRef.current.style.borderColor = "rgba(255, 255, 255, 0.7)";
+      ringRef.current.style.background = "rgba(255, 255, 255, 0.08)";
+      setTimeout(() => {
+        if (!ringRef.current) return;
+        ringRef.current.style.transform = "";
+        if (isHoveringRef.current) {
+          ringRef.current.style.borderColor = "rgba(255, 255, 255, 0.5)";
+          ringRef.current.style.background = "rgba(255, 255, 255, 0.04)";
+        } else {
+          ringRef.current.style.borderColor = "rgba(255, 255, 255, 0.25)";
+          ringRef.current.style.background = "transparent";
+        }
+      }, 200);
+    }
+  }, []);
 
   useEffect(() => {
-    const dot = dotRef.current;
-    const ring = ringRef.current;
-    if (!dot || !ring) return;
+    const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
+    if (isTouchDevice) return;
 
-    const onMouseMove = (e: MouseEvent) => {
-      mousePos.current = { x: e.clientX, y: e.clientY };
-      dot.style.transform = `translate(${e.clientX - 4}px, ${e.clientY - 4}px)`;
-    };
+    document.body.style.cursor = "none";
 
-    const onMouseDown = () => setClicking(true);
-    const onMouseUp = () => setClicking(false);
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+    document.addEventListener("mouseover", handleMouseOver, { passive: true });
+    document.addEventListener("mouseout", handleMouseOut, { passive: true });
+    document.addEventListener("mousedown", handleClick);
+    document.addEventListener("mouseup", handleClick);
 
-    const animate = () => {
-      const dx = mousePos.current.x - ringPos.current.x;
-      const dy = mousePos.current.y - ringPos.current.y;
-      ringPos.current.x += dx * 0.15;
-      ringPos.current.y += dy * 0.15;
-      ring.style.transform = `translate(${ringPos.current.x - 20}px, ${ringPos.current.y - 20}px)`;
-      rafId.current = requestAnimationFrame(animate);
-    };
-
-    const handleMouseOver = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (
-        target.closest("a") ||
-        target.closest("button") ||
-        target.closest("[data-cursor-hover]")
-      ) {
-        setHovering(true);
+    const style = document.createElement("style");
+    style.textContent = `
+      a, button, [role="button"], input, textarea, select, [data-cursor] {
+        cursor: none !important;
       }
-    };
-
-    const handleMouseOut = () => setHovering(false);
-
-    document.addEventListener("mousemove", onMouseMove);
-    document.addEventListener("mousedown", onMouseDown);
-    document.addEventListener("mouseup", onMouseUp);
-    document.addEventListener("mouseover", handleMouseOver);
-    document.addEventListener("mouseout", handleMouseOut);
-    rafId.current = requestAnimationFrame(animate);
+    `;
+    document.head.appendChild(style);
 
     return () => {
-      document.removeEventListener("mousemove", onMouseMove);
-      document.removeEventListener("mousedown", onMouseDown);
-      document.removeEventListener("mouseup", onMouseUp);
+      document.body.style.cursor = "";
+      window.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseover", handleMouseOver);
       document.removeEventListener("mouseout", handleMouseOut);
-      cancelAnimationFrame(rafId.current);
+      document.removeEventListener("mousedown", handleClick);
+      document.removeEventListener("mouseup", handleClick);
+      document.head.removeChild(style);
     };
-  }, []);
+  }, [handleMouseMove, handleMouseOver, handleMouseOut, handleClick]);
 
   return (
     <>
-      <div
-        ref={dotRef}
-        className="fixed top-0 left-0 w-2 h-2 rounded-full bg-accent-cyan pointer-events-none z-[100] mix-blend-difference transition-transform duration-150 hidden md:block"
+      {/* Outer blur glow — adds depth and visibility on dark backgrounds */}
+      <motion.div
+        ref={glowRef}
+        className="fixed top-0 left-0 z-[9998] pointer-events-none rounded-full -translate-x-1/2 -translate-y-1/2 will-change-transform hidden md:block"
         style={{
-          transform: "translate(-100px, -100px)",
-          scale: clicking ? "0.5" : "1",
+          x: springX,
+          y: springY,
+          width: "64px",
+          height: "64px",
+          background: "radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%)",
+          opacity: 0.35,
+          transition: "opacity 0.35s ease, transform 0.35s ease",
         }}
       />
-      <div
+
+      {/* Outer ring */}
+      <motion.div
         ref={ringRef}
-        className={`fixed top-0 left-0 w-10 h-10 rounded-full border pointer-events-none z-[100] transition-all duration-300 hidden md:block ${
-          hovering
-            ? "w-16 h-16 border-accent-cyan/60 bg-accent-cyan/10 -translate-x-8 -translate-y-8"
-            : "border-accent-cyan/30"
-        }`}
+        className="fixed top-0 left-0 z-[9999] pointer-events-none rounded-full border -translate-x-1/2 -translate-y-1/2 will-change-transform hidden md:block backdrop-blur-sm"
         style={{
-          transform: "translate(-100px, -100px)",
+          x: springX,
+          y: springY,
+          width: "32px",
+          height: "32px",
+          borderColor: "rgba(255, 255, 255, 0.25)",
+          background: "transparent",
+          boxShadow: "0 0 16px rgba(255, 255, 255, 0.06)",
+          transition:
+            "width 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), height 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, transform 0.15s ease",
+        }}
+      />
+
+      {/* Inner dot */}
+      <motion.div
+        ref={dotRef}
+        className="fixed top-0 left-0 z-[9999] pointer-events-none rounded-full -translate-x-1/2 -translate-y-1/2 will-change-transform hidden md:block"
+        style={{
+          x: springX,
+          y: springY,
+          width: "6px",
+          height: "6px",
+          background: "rgba(255, 255, 255, 0.85)",
+          boxShadow: "0 0 8px rgba(255, 255, 255, 0.3)",
+          transition: "background 0.3s ease, box-shadow 0.3s ease",
         }}
       />
     </>

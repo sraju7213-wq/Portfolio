@@ -1,332 +1,296 @@
-import { motion } from "framer-motion";
-import { ArrowDown, Sparkles, Code2, Terminal, Zap, Layers } from "lucide-react";
-import { hero } from "../data/content";
-import MagneticButton from "./MagneticButton";
-import TiltCard from "./TiltCard";
+import { useRef, useState, useCallback } from "react";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { ArrowRight, Code2, Palette, Sparkles, Brush, Zap, Globe, Image, Printer } from "lucide-react";
+import { splitHero } from "../data/content";
+import FloatingParticles from "./FloatingParticles";
 
-const codeSnippet = `const app = createApp({
-  name: "Portfolio",
-  theme: "dark",
-  features: [
-    "high-performance",
-    "premium-ui",
-    "scalable"
-  ],
-  render: () => (
-    <UserExperience 
-      speed="instant"
-      design="premium"
-      conversion="optimized"
-    />
-  )
-});`;
-
-const codeLines = [
-  { icon: Layers, label: "components", color: "#00e5ff" },
-  { icon: Zap, label: "hooks", color: "#8b5cf6" },
-  { icon: Terminal, label: "utils", color: "#10b981" },
-  { icon: Code2, label: "api", color: "#f59e0b" },
-];
+const leftIcons = [Code2, Globe, Zap, Sparkles, Globe];
+const rightIcons = [Palette, Image, Sparkles, Image, Printer];
 
 export default function Hero() {
-  return (
-    <section className="relative min-h-screen flex items-center overflow-hidden">
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-[10%] left-[10%] w-[400px] h-[400px] rounded-full bg-accent-cyan/[0.06] blur-[100px]" />
-        <div className="absolute bottom-[20%] right-[10%] w-[500px] h-[500px] rounded-full bg-accent-violet/[0.06] blur-[120px]" />
-        <div className="absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full bg-accent-cyan/[0.03] blur-[80px]" />
-        <div className="absolute inset-0 bg-grid" />
-      </div>
+  const sectionRef = useRef<HTMLElement>(null);
+  const [mousePos, setMousePos] = useState({ x: 0.5, y: 0.5 });
+  const [hoveredSide, setHoveredSide] = useState<"left" | "right" | null>(null);
 
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 py-20 lg:py-0">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"],
+  });
+
+  const contentY = useTransform(scrollYProgress, [0, 1], [0, -40]);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!sectionRef.current) return;
+    const rect = sectionRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    setMousePos({ x, y });
+    setHoveredSide(x < 0.5 ? "left" : "right");
+  }, []);
+
+  return (
+    <section
+      id="hero"
+      ref={sectionRef}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={() => setHoveredSide(null)}
+      className="relative min-h-screen flex items-center overflow-hidden bg-bg-primary"
+    >
+      <FloatingParticles count={10} />
+
+      {/* Base gradient */}
+      <div className="absolute inset-0 bg-gradient-to-b from-bg-primary via-bg-surface/20 to-bg-primary" />
+
+      {/* Left glow */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none"
+        animate={{
+          opacity: hoveredSide === "left" ? 1 : 0,
+        }}
+        transition={{ duration: 0.6 }}
+        style={{
+          background: `radial-gradient(circle 600px at ${mousePos.x * 100}% ${mousePos.y * 100}%, rgba(0, 229, 255, 0.07) 0%, transparent 70%)`,
+        }}
+      />
+
+      {/* Right glow */}
+      <motion.div
+        className="absolute inset-0 pointer-events-none"
+        animate={{
+          opacity: hoveredSide === "right" ? 1 : 0,
+        }}
+        transition={{ duration: 0.6 }}
+        style={{
+          background: `radial-gradient(circle 600px at ${mousePos.x * 100}% ${mousePos.y * 100}%, rgba(168, 85, 247, 0.07) 0%, transparent 70%)`,
+        }}
+      />
+
+      {/* Grid */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:80px_80px] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_50%,black,transparent)]" />
+
+      {/* Split content */}
+      <motion.div style={{ y: contentY }} className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8">
+        <div className="grid lg:grid-cols-2 gap-0 min-h-[80vh] items-center relative">
+          {/* ─── Left: Web Development ─── */}
           <motion.div
-            initial={{ opacity: 0, x: -30 }}
+            initial={{ opacity: 0, x: -40 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 2.2 }}
-            className="text-center lg:text-left"
+            className="flex flex-col justify-center py-16 lg:py-24 lg:pr-16"
           >
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 2.4 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent-cyan/[0.06] border border-accent-cyan/15 mb-8"
-            >
-              <motion.div
-                animate={{ rotate: [0, 360] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-              >
-                <Sparkles size={14} className="text-accent-cyan" />
-              </motion.div>
-              <span className="text-xs font-medium tracking-wider text-accent-cyan uppercase">
-                Full-Stack Developer
+            <div className="flex items-center gap-2 mb-6">
+              <Code2 size={14} className="text-accent-cyan" />
+              <span className="text-[10px] font-semibold tracking-[0.25em] uppercase text-accent-cyan">
+                {splitHero.left.label}
               </span>
-            </motion.div>
+            </div>
 
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
+            <h1 className="font-heading text-[clamp(2rem,4vw,3.5rem)] font-bold tracking-tight leading-[1.1] text-text-primary mb-5">
+              {splitHero.left.headline}
+            </h1>
+
+            <p className="text-text-secondary text-sm md:text-base leading-relaxed mb-8 max-w-md">
+              {splitHero.left.subtitle}
+            </p>
+
+            <ul className="space-y-3 mb-10">
+              {splitHero.left.services.map((service, i) => (
+                <motion.li
+                  key={service}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 2.5 + i * 0.08 }}
+                  className="flex items-center gap-3 text-sm text-text-secondary"
+                >
+                  <div className="w-7 h-7 rounded-lg bg-accent-cyan/10 border border-accent-cyan/20 flex items-center justify-center shrink-0">
+                    {(() => {
+                      const Icon = leftIcons[i % leftIcons.length];
+                      return <Icon size={13} className="text-accent-cyan" />;
+                    })()}
+                  </div>
+                  {service}
+                </motion.li>
+              ))}
+            </ul>
+
+            <motion.a
+              href={splitHero.left.ctaHref}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 2.6 }}
-              className="font-heading text-4xl sm:text-5xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight leading-[1.1] mb-6"
+              transition={{ delay: 2.9 }}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-white/15 bg-white/[0.03] text-sm font-medium text-text-primary hover:bg-white/[0.06] hover:border-accent-cyan/30 transition-all duration-300 w-fit group"
             >
-              <span className="gradient-text-shimmer text-glow">
-                {hero.headline}
-              </span>
-            </motion.h1>
-
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 2.8 }}
-              className="text-text-secondary text-base sm:text-lg md:text-xl max-w-xl mx-auto lg:mx-0 leading-relaxed mb-10"
-            >
-              {hero.subtitle}
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 3 }}
-              className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-4"
-            >
-              <MagneticButton href="#portfolio" className="btn-primary">
-                <span>{hero.ctaPrimary}</span>
-              </MagneticButton>
-              <MagneticButton href="#contact" className="btn-secondary">
-                <span>{hero.ctaSecondary}</span>
-              </MagneticButton>
-            </motion.div>
-
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 3.2 }}
-              className="text-text-muted text-sm"
-            >
-              {hero.availability}
-            </motion.p>
+              {splitHero.left.cta}
+              <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+            </motion.a>
           </motion.div>
 
+          {/* ─── Center Divider ─── */}
+          <div className="hidden lg:flex absolute left-1/2 top-0 bottom-0 -translate-x-1/2 flex-col items-center justify-center z-20">
+            <div className="flex-1 w-px bg-gradient-to-b from-transparent via-white/10 to-transparent" />
+            <div className="py-8">
+              <span
+                className="text-[9px] tracking-[0.3em] uppercase text-text-muted/40 font-medium"
+                style={{ writingMode: "vertical-lr" }}
+              >
+                {splitHero.dividerText}
+              </span>
+            </div>
+            <div className="flex-1 w-px bg-gradient-to-b from-transparent via-white/10 to-transparent" />
+          </div>
+
+          {/* ─── Right: Graphic Design ─── */}
           <motion.div
-            initial={{ opacity: 0, x: 30 }}
+            initial={{ opacity: 0, x: 40 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 2.4 }}
-            className="relative hidden lg:block"
+            className="flex flex-col justify-center py-16 lg:py-24 lg:pl-16 lg:text-right"
           >
-            <TiltCard
-              className="relative"
-              maxTilt={8}
-              glowIntensity={0.1}
-            >
-              <div className="glass-heavy rounded-2xl p-6 overflow-hidden">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="flex gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-red-500/80" />
-                    <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-                    <div className="w-3 h-3 rounded-full bg-green-500/80" />
-                  </div>
-                  <div className="flex-1 text-center">
-                    <span className="text-xs text-text-muted">portfolio.tsx</span>
-                  </div>
-                </div>
-
-                <div className="flex gap-3 mb-4">
-                  {codeLines.map((item, i) => (
-                    <motion.div
-                      key={item.label}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4, delay: 2.6 + i * 0.1 }}
-                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-bg-surface/50"
-                    >
-                      <item.icon size={12} style={{ color: item.color }} />
-                      <span className="text-[10px] text-text-muted uppercase tracking-wide">
-                        {item.label}
-                      </span>
-                    </motion.div>
-                  ))}
-                </div>
-
-                <div className="relative">
-                  <div className="absolute left-0 top-0 bottom-0 w-8 border-r border-border-subtle/50" />
-                  <pre className="pl-10 text-xs leading-relaxed overflow-x-auto">
-                    <code className="text-text-secondary">
-                      <motion.span
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 0.4, delay: 3 }}
-                      >
-                        <span className="text-accent-violet">const</span>{" "}
-                        <span className="text-accent-cyan">app</span>{" "}
-                        <span className="text-text-primary">=</span>{" "}
-                        <span className="text-accent-cyan">createApp</span>
-                        <span className="text-text-primary">(</span>
-                        <span className="text-accent-violet">{"{"}</span>
-                        {"\n"}
-                        {"  "}
-                        <span className="text-accent-violet">name</span>
-                        <span className="text-text-primary">:</span>{" "}
-                        <span className="text-green-400">"Portfolio"</span>
-                        <span className="text-text-primary">,</span>
-                        {"\n"}
-                        {"  "}
-                        <span className="text-accent-violet">theme</span>
-                        <span className="text-text-primary">:</span>{" "}
-                        <span className="text-green-400">"dark"</span>
-                        <span className="text-text-primary">,</span>
-                        {"\n"}
-                        {"  "}
-                        <span className="text-accent-violet">features</span>
-                        <span className="text-text-primary">:</span>{" "}
-                        <span className="text-text-primary">[</span>
-                        {"\n"}
-                        {"    "}
-                        <span className="text-green-400">
-                          "high-performance"
-                        </span>
-                        <span className="text-text-primary">,</span>
-                        {"\n"}
-                        {"    "}
-                        <span className="text-green-400">"premium-ui"</span>
-                        <span className="text-text-primary">,</span>
-                        {"\n"}
-                        {"    "}
-                        <span className="text-green-400">"scalable"</span>
-                        {"\n"}
-                        {"  "}
-                        <span className="text-text-primary">],</span>
-                        {"\n"}
-                        {"  "}
-                        <span className="text-accent-violet">render</span>
-                        <span className="text-text-primary">:</span>{" "}
-                        <span className="text-accent-violet">()</span>{" "}
-                        <span className="text-accent-violet">{'=>'}</span>{" "}
-                        <span className="text-text-primary">(</span>
-                        {"\n"}
-                        {"    "}
-                        <span className="text-accent-cyan">{'<UserExperience'}</span>
-                        {"\n"}
-                        {"      "}
-                        <span className="text-accent-violet">speed</span>
-                        <span className="text-text-primary">=</span>
-                        <span className="text-green-400">"instant"</span>
-                        {"\n"}
-                        {"      "}
-                        <span className="text-accent-violet">design</span>
-                        <span className="text-text-primary">=</span>
-                        <span className="text-green-400">"premium"</span>
-                        {"\n"}
-                        {"      "}
-                        <span className="text-accent-violet">conversion</span>
-                        <span className="text-text-primary">=</span>
-                        <span className="text-green-400">"optimized"</span>
-                        {"\n"}
-                        {"    "}
-                        <span className="text-text-primary">{'/>'}</span>
-                        {"\n"}
-                        {"  "}
-                        <span className="text-text-primary">)</span>
-                        {"\n"}
-                        <span className="text-accent-violet">{"}"}</span>
-                        <span className="text-text-primary">);</span>
-                      </motion.span>
-                    </code>
-                  </pre>
-                </div>
-
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5, delay: 3.4 }}
-                  className="absolute bottom-4 right-4 flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent-cyan/[0.1] border border-accent-cyan/20"
-                >
-                  <div className="w-2 h-2 rounded-full bg-accent-cyan animate-pulse" />
-                  <span className="text-[10px] text-accent-cyan font-medium">
-                    Building...
-                  </span>
-                </motion.div>
-              </div>
-
-              <motion.div
-                animate={{ y: [0, -8, 0] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute -top-12 -right-12 w-24 h-24 rounded-2xl bg-gradient-to-br from-accent-cyan/20 to-accent-violet/20 backdrop-blur-xl border border-white/10 flex items-center justify-center"
-              >
-                <Zap size={24} className="text-accent-cyan" />
-              </motion.div>
-
-              <motion.div
-                animate={{ y: [0, 8, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                className="absolute -bottom-8 -left-8 w-16 h-16 rounded-xl bg-gradient-to-br from-accent-violet/20 to-accent-cyan/20 backdrop-blur-xl border border-white/10 flex items-center justify-center"
-              >
-                <Code2 size={20} className="text-accent-violet" />
-              </motion.div>
-            </TiltCard>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 2.6 }}
-            className="lg:hidden"
-          >
-            <div className="glass-heavy rounded-2xl p-5 overflow-hidden">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="flex gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
-                  <div className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
-                </div>
-                <span className="text-[10px] text-text-muted">portfolio.tsx</span>
-              </div>
-              <pre className="text-[9px] leading-relaxed overflow-x-auto">
-                <code className="text-text-secondary">
-                  <span className="text-accent-violet">const</span>{" "}
-                  <span className="text-accent-cyan">app</span>{" "}
-                  <span className="text-text-primary">=</span>{" "}
-                  <span className="text-accent-cyan">createApp</span>
-                  <span className="text-text-primary">({"{"}</span>
-                  <span className="text-accent-violet">name</span>
-                  <span className="text-text-primary">:</span>{" "}
-                  <span className="text-green-400">"Portfolio"</span>
-                  <span className="text-text-primary">,</span>
-                  {"\n"}
-                  <span className="text-accent-violet">theme</span>
-                  <span className="text-text-primary">:</span>{" "}
-                  <span className="text-green-400">"dark"</span>
-                  <span className="text-text-primary">,</span>
-                  {"\n"}
-                  <span className="text-accent-violet">render</span>
-                  <span className="text-text-primary">:</span>{" "}
-                  <span className="text-accent-violet">()</span>{" "}
-                  <span className="text-accent-violet">{'=>'}</span>{" "}
-                  <span className="text-text-primary">{'<'}</span>
-                  <span className="text-accent-cyan">UX</span>
-                  <span className="text-text-primary">{' />'}</span>
-                  <span className="text-text-primary">);</span>
-                </code>
-              </pre>
+            <div className="flex items-center gap-2 mb-6 lg:justify-end">
+              <span className="text-[10px] font-semibold tracking-[0.25em] uppercase text-accent-violet">
+                {splitHero.right.label}
+              </span>
+              <Brush size={14} className="text-accent-violet" />
             </div>
+
+            <h2 className="font-heading text-[clamp(2rem,4vw,3.5rem)] font-bold tracking-tight leading-[1.1] text-text-primary mb-5 italic" style={{ fontFamily: "'Playfair Display', serif" }}>
+              {splitHero.right.headline}
+            </h2>
+
+            <p className="text-text-secondary text-sm md:text-base leading-relaxed mb-8 lg:ml-auto max-w-md">
+              {splitHero.right.subtitle}
+            </p>
+
+            <ul className="space-y-3 mb-10">
+              {splitHero.right.services.map((service, i) => (
+                <motion.li
+                  key={service}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 2.6 + i * 0.08 }}
+                  className="flex items-center gap-3 text-sm text-text-secondary lg:flex-row-reverse"
+                >
+                  <div className="w-7 h-7 rounded-lg bg-accent-violet/10 border border-accent-violet/20 flex items-center justify-center shrink-0">
+                    {(() => {
+                      const Icon = rightIcons[i % rightIcons.length];
+                      return <Icon size={13} className="text-accent-violet" />;
+                    })()}
+                  </div>
+                  {service}
+                </motion.li>
+              ))}
+            </ul>
+
+            <motion.a
+              href={splitHero.right.ctaHref}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 3.1 }}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-accent-violet/90 text-sm font-medium text-white hover:bg-accent-violet transition-all duration-300 w-fit lg:ml-auto group"
+            >
+              {splitHero.right.cta}
+              <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+            </motion.a>
           </motion.div>
         </div>
-      </div>
 
-      <motion.a
-        href="#about"
+        {/* ─── Bottom: Floating Preview Cards ─── */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 3.3, duration: 0.6 }}
+          className="hidden lg:flex justify-center gap-6 -mt-8 mb-8 relative z-30"
+        >
+          {/* Code terminal card */}
+          <motion.div
+            animate={{ y: [0, -6, 0] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            className="w-64 rounded-xl overflow-hidden border border-white/[0.08] bg-bg-surface/60 backdrop-blur-xl shadow-elevated"
+          >
+            <div className="flex items-center gap-1.5 px-3 py-2 border-b border-white/[0.06] bg-bg-primary/40">
+              <div className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
+              <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
+              <div className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
+              <span className="ml-2 text-[9px] text-text-muted font-mono">app.tsx</span>
+            </div>
+            <div className="p-3 font-mono text-[10px] leading-relaxed space-y-0.5">
+              <div><span className="text-accent-violet">const</span> <span className="text-accent-cyan">app</span> <span className="text-text-muted">=</span> <span className="text-amber-400">{"{"}</span></div>
+              <div className="pl-3"><span className="text-text-secondary">stack</span><span className="text-text-muted">:</span> <span className="text-green-400">"React + TS"</span></div>
+              <div className="pl-3"><span className="text-text-secondary">style</span><span className="text-text-muted">:</span> <span className="text-green-400">"Tailwind"</span></div>
+              <div className="pl-3"><span className="text-text-secondary">motion</span><span className="text-text-muted">:</span> <span className="text-green-400">"Framer"</span></div>
+              <div><span className="text-amber-400">{"}"}</span></div>
+            </div>
+          </motion.div>
+
+          {/* Design grid card */}
+          <motion.div
+            animate={{ y: [0, -8, 0] }}
+            transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+            className="w-52 rounded-xl overflow-hidden border border-white/[0.08] bg-bg-surface/60 backdrop-blur-xl shadow-elevated"
+          >
+            <div className="flex items-center gap-2 px-3 py-2 border-b border-white/[0.06] bg-bg-primary/40">
+              <div className="w-4 h-4 rounded bg-accent-violet/30 flex items-center justify-center">
+                <span className="text-[7px] font-bold text-accent-violet">B</span>
+              </div>
+              <div className="flex-1 h-1.5 rounded bg-white/[0.06]" />
+            </div>
+            <div className="p-3 grid grid-cols-3 gap-1.5">
+              {[
+                "from-cyan-600/40 to-teal-600/40",
+                "from-violet-600/40 to-purple-600/40",
+                "from-rose-600/40 to-pink-600/40",
+                "from-amber-600/40 to-orange-600/40",
+                "from-emerald-600/40 to-green-600/40",
+                "from-indigo-600/40 to-blue-600/40",
+              ].map((grad, i) => (
+                <div key={i} className={`aspect-square rounded-md bg-gradient-to-br ${grad}`} />
+              ))}
+            </div>
+            <div className="px-3 pb-2 flex items-center gap-1.5">
+              <div className="w-3 h-3 rounded-full bg-accent-cyan/30 flex items-center justify-center">
+                <Sparkles size={6} className="text-accent-cyan" />
+              </div>
+              <div className="flex-1 flex gap-1">
+                {Array.from({ length: 7 }).map((_, i) => (
+                  <div key={i} className="flex-1 h-3 rounded-sm" style={{ background: `hsl(${i * 50}, 60%, 50%)` }} />
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      </motion.div>
+
+      {/* Scroll indicator */}
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, delay: 3.5 }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-text-muted hover:text-accent-cyan transition-colors duration-300"
+        transition={{ duration: 1, delay: 3.5 }}
+        className="absolute bottom-8 left-1/2 -translate-x-1/2"
       >
-        <span className="text-xs tracking-widest uppercase">Scroll</span>
-        <motion.div
-          animate={{ y: [0, 8, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
+        <motion.a
+          href="#about"
+          className="flex flex-col items-center gap-3 group"
+          animate={{ y: [0, 6, 0] }}
+          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
         >
-          <ArrowDown size={16} />
-        </motion.div>
-      </motion.a>
+          <span className="text-[10px] tracking-[0.25em] uppercase text-text-muted/60 group-hover:text-text-secondary transition-colors duration-300">
+            Scroll
+          </span>
+          <div className="relative">
+            <div className="w-[18px] h-[30px] rounded-full border border-text-muted/20 group-hover:border-accent-cyan/30 transition-colors duration-300 flex items-start justify-center p-1.5">
+              <motion.div
+                animate={{ y: [0, 10, 0] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                className="w-[3px] h-[6px] rounded-full bg-gradient-to-b from-accent-cyan to-accent-violet"
+              />
+            </div>
+          </div>
+        </motion.a>
+      </motion.div>
     </section>
   );
 }
