@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ExternalLink, Check, Palette, Code, ChevronLeft, ChevronRight, Maximize2, ZoomIn, ZoomOut } from "lucide-react";
-import { useEffect, useState, useCallback } from "react";
+import { X, ExternalLink, Check, Palette, Code, ChevronLeft, ChevronRight, Maximize2, Plus, Minus, RotateCcw } from "lucide-react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import type { CaseStudy } from "../data/content";
 
 type CaseStudyModalProps = {
@@ -19,9 +19,23 @@ function SectionHeading({ accent, children }: { accent: string; children: React.
 
 export default function CaseStudyModal({ study, onClose }: CaseStudyModalProps) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-  const [zoomed, setZoomed] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const imageRef = useRef<HTMLDivElement>(null);
 
-  const handleLightboxClose = useCallback(() => { setZoomed(false); setLightboxIndex(null); }, []);
+  const handleLightboxClose = useCallback(() => { setZoomLevel(1); setOffset({ x: 0, y: 0 }); setLightboxIndex(null); }, []);
+
+  const zoomIn = useCallback(() => setZoomLevel((v) => Math.min(v + 0.5, 5)), []);
+  const zoomOut = useCallback(() => setZoomLevel((v) => Math.max(v - 0.5, 1)), []);
+  const resetZoom = useCallback(() => { setZoomLevel(1); setOffset({ x: 0, y: 0 }); }, []);
+
+  const handleWheel = useCallback((e: WheelEvent) => {
+    if (e.deltaY < 0) zoomIn();
+    else if (e.deltaY > 0 && zoomLevel > 1) zoomOut();
+    else if (e.deltaY > 0) resetZoom();
+  }, [zoomIn, zoomOut, resetZoom, zoomLevel]);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -39,12 +53,36 @@ export default function CaseStudyModal({ study, onClose }: CaseStudyModalProps) 
     if (lightboxIndex === null || !study.screenshots) return;
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") handleLightboxClose();
-      if (e.key === "ArrowLeft") setLightboxIndex((prev) => prev !== null && prev > 0 ? prev - 1 : prev);
-      if (e.key === "ArrowRight") setLightboxIndex((prev) => prev !== null && study.screenshots && prev < study.screenshots.length - 1 ? prev + 1 : prev);
+      if (e.key === "ArrowLeft") { resetZoom(); setLightboxIndex((prev) => prev !== null && prev > 0 ? prev - 1 : prev); }
+      if (e.key === "ArrowRight") { resetZoom(); setLightboxIndex((prev) => prev !== null && study.screenshots && prev < study.screenshots.length - 1 ? prev + 1 : prev); }
+      if ((e.key === "=" || e.key === "+") && lightboxIndex !== null) zoomIn();
+      if (e.key === "-" && lightboxIndex !== null) zoomOut();
+      if (e.key === "0" && lightboxIndex !== null) resetZoom();
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [lightboxIndex, study.screenshots, handleLightboxClose]);
+  }, [lightboxIndex, study.screenshots, handleLightboxClose, zoomIn, zoomOut, resetZoom]);
+
+  useEffect(() => {
+    if (lightboxIndex === null) return;
+    const el = imageRef.current;
+    if (!el) return;
+    el.addEventListener("wheel", handleWheel, { passive: true });
+    return () => el.removeEventListener("wheel", handleWheel);
+  }, [lightboxIndex, handleWheel]);
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (zoomLevel <= 1) return;
+    setIsDragging(true);
+    setDragStart({ x: e.clientX - offset.x, y: e.clientY - offset.y });
+  }, [zoomLevel, offset]);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!isDragging || zoomLevel <= 1) return;
+    setOffset({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y });
+  }, [isDragging, zoomLevel, dragStart]);
+
+  const handleMouseUp = useCallback(() => setIsDragging(false), []);
 
   const accent = study.accentColor;
 
@@ -333,14 +371,37 @@ export default function CaseStudyModal({ study, onClose }: CaseStudyModalProps) 
                         </button>
                       )}
 
-                      <div className="absolute top-6 left-6 z-10 flex gap-2">
-                        <button
-                          onClick={(e) => { e.stopPropagation(); setZoomed(!zoomed); }}
-                          className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all"
-                          title={zoomed ? "Zoom out" : "Zoom in"}
-                        >
-                          {zoomed ? <ZoomOut size={18} /> : <ZoomIn size={18} />}
-                        </button>
+                      <div className="absolute top-6 left-6 z-10 flex items-center gap-2">
+                        <div className="flex items-center rounded-full bg-white/10 backdrop-blur-xl border border-white/20 overflow-hidden">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); zoomOut(); }}
+                            className="w-9 h-9 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all disabled:opacity-30"
+                            disabled={zoomLevel <= 1}
+                            title="Zoom out"
+                          >
+                            <Minus size={14} />
+                          </button>
+                          <span className="text-white/80 text-xs font-medium tabular-nums w-10 text-center select-none">
+                            {Math.round(zoomLevel * 100)}%
+                          </span>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); zoomIn(); }}
+                            className="w-9 h-9 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all disabled:opacity-30"
+                            disabled={zoomLevel >= 5}
+                            title="Zoom in"
+                          >
+                            <Plus size={14} />
+                          </button>
+                        </div>
+                        {zoomLevel > 1 && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); resetZoom(); }}
+                            className="w-9 h-9 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/20 transition-all"
+                            title="Reset zoom"
+                          >
+                            <RotateCcw size={14} />
+                          </button>
+                        )}
                       </div>
 
                       <motion.div
@@ -350,22 +411,35 @@ export default function CaseStudyModal({ study, onClose }: CaseStudyModalProps) 
                         exit={{ opacity: 0, scale: 0.9 }}
                         transition={{ duration: 0.3 }}
                         className="relative z-10 w-full max-w-5xl flex flex-col"
-                        style={{ maxHeight: zoomed ? "100vh" : "85vh" }}
                         onClick={(e) => e.stopPropagation()}
                       >
                         <div
-                          className={`relative flex-1 flex items-center justify-center rounded-2xl ${zoomed ? "overflow-auto cursor-zoom-out" : "overflow-hidden cursor-zoom-in"}`}
-                          onClick={() => setZoomed(!zoomed)}
+                          ref={imageRef}
+                          className="relative flex-1 flex items-center justify-center overflow-hidden rounded-2xl select-none"
+                          style={{ maxHeight: "80vh" }}
+                          onMouseDown={handleMouseDown}
+                          onMouseMove={handleMouseMove}
+                          onMouseUp={handleMouseUp}
+                          onMouseLeave={handleMouseUp}
                         >
                           <img
                             src={study.screenshots[lightboxIndex].src}
                             alt={study.screenshots[lightboxIndex].title}
-                            className={`rounded-2xl shadow-2xl transition-transform duration-300 ${zoomed ? "max-w-none max-h-none scale-[2]" : "max-w-full max-h-[75vh] w-auto h-auto object-contain"}`}
-                            style={zoomed ? { transformOrigin: "center center" } : {}}
+                            className="rounded-2xl shadow-2xl pointer-events-none"
+                            style={{
+                              maxWidth: zoomLevel > 1 ? "none" : "100%",
+                              maxHeight: zoomLevel > 1 ? "none" : "75vh",
+                              width: zoomLevel > 1 ? `${zoomLevel * 100}%` : "auto",
+                              height: zoomLevel > 1 ? `${zoomLevel * 100}%` : "auto",
+                              objectFit: zoomLevel > 1 ? "none" : "contain",
+                              transform: zoomLevel > 1 ? `translate(${offset.x}px, ${offset.y}px)` : "none",
+                              transition: isDragging ? "none" : "transform 0.2s ease-out, width 0.2s ease-out, height 0.2s ease-out",
+                              cursor: zoomLevel > 1 ? (isDragging ? "grabbing" : "grab") : "default",
+                            }}
                             draggable={false}
                           />
                         </div>
-                        {!zoomed && (
+                        {zoomLevel <= 1 && (
                           <div className="text-center mt-4">
                             <h4 className="text-white font-heading font-bold text-sm">
                               {study.screenshots[lightboxIndex].title}
