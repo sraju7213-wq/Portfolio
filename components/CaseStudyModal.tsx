@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ExternalLink, Check, Palette, Code, ChevronLeft, ChevronRight, Maximize2 } from "lucide-react";
+import { X, ExternalLink, Check, Palette, Code, ChevronLeft, ChevronRight, Maximize2, ZoomIn, ZoomOut } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import type { CaseStudy } from "../data/content";
 
@@ -19,8 +19,9 @@ function SectionHeading({ accent, children }: { accent: string; children: React.
 
 export default function CaseStudyModal({ study, onClose }: CaseStudyModalProps) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [zoomed, setZoomed] = useState(false);
 
-  const handleLightboxClose = useCallback(() => setLightboxIndex(null), []);
+  const handleLightboxClose = useCallback(() => { setZoomed(false); setLightboxIndex(null); }, []);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -332,30 +333,48 @@ export default function CaseStudyModal({ study, onClose }: CaseStudyModalProps) 
                         </button>
                       )}
 
+                      <div className="absolute top-6 left-6 z-10 flex gap-2">
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setZoomed(!zoomed); }}
+                          className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all"
+                          title={zoomed ? "Zoom out" : "Zoom in"}
+                        >
+                          {zoomed ? <ZoomOut size={18} /> : <ZoomIn size={18} />}
+                        </button>
+                      </div>
+
                       <motion.div
                         key={lightboxIndex}
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.9 }}
                         transition={{ duration: 0.3 }}
-                        className="relative z-10 w-full max-w-5xl max-h-[85vh] flex flex-col"
+                        className="relative z-10 w-full max-w-5xl flex flex-col"
+                        style={{ maxHeight: zoomed ? "100vh" : "85vh" }}
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <div className="relative flex-1 flex items-center justify-center overflow-hidden rounded-2xl">
+                        <div
+                          className={`relative flex-1 flex items-center justify-center rounded-2xl ${zoomed ? "overflow-auto cursor-zoom-out" : "overflow-hidden cursor-zoom-in"}`}
+                          onClick={() => setZoomed(!zoomed)}
+                        >
                           <img
                             src={study.screenshots[lightboxIndex].src}
                             alt={study.screenshots[lightboxIndex].title}
-                            className="max-w-full max-h-[75vh] w-auto h-auto object-contain rounded-2xl shadow-2xl"
+                            className={`rounded-2xl shadow-2xl transition-transform duration-300 ${zoomed ? "max-w-none max-h-none scale-[2]" : "max-w-full max-h-[75vh] w-auto h-auto object-contain"}`}
+                            style={zoomed ? { transformOrigin: "center center" } : {}}
+                            draggable={false}
                           />
                         </div>
-                        <div className="text-center mt-4">
-                          <h4 className="text-white font-heading font-bold text-sm">
-                            {study.screenshots[lightboxIndex].title}
-                          </h4>
-                          <p className="text-white/60 text-xs mt-1">
-                            {study.screenshots[lightboxIndex].description}
-                          </p>
-                        </div>
+                        {!zoomed && (
+                          <div className="text-center mt-4">
+                            <h4 className="text-white font-heading font-bold text-sm">
+                              {study.screenshots[lightboxIndex].title}
+                            </h4>
+                            <p className="text-white/60 text-xs mt-1">
+                              {study.screenshots[lightboxIndex].description}
+                            </p>
+                          </div>
+                        )}
                       </motion.div>
                     </motion.div>
                   )}
