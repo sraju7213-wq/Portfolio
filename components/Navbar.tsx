@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Sparkles } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { navLinks } from "../data/content";
 
 const sections = navLinks.map((link) => link.href.replace("#", ""));
@@ -11,21 +11,43 @@ export default function Navbar() {
   const [activeSection, setActiveSection] = useState("");
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const navRef = useRef<HTMLElement>(null);
+  const offsetsRef = useRef<Map<string, number>>(new Map());
+  const activeRef = useRef(activeSection);
+
+  activeRef.current = activeSection;
+
+  const buildOffsets = useCallback(() => {
+    const map = new Map<string, number>();
+    for (const id of sections) {
+      const el = document.getElementById(id);
+      if (el) map.set(id, el.offsetTop);
+    }
+    offsetsRef.current = map;
+  }, []);
 
   const handleScroll = useCallback(() => {
     setScrolled(window.scrollY > 50);
 
     const scrollPos = window.scrollY + 200;
-    for (let i = sections.length - 1; i >= 0; i--) {
-      const el = document.getElementById(sections[i]);
-      if (el && el.offsetTop <= scrollPos) {
-        setActiveSection(sections[i]);
-        break;
+    let active = "";
+
+    for (const id of sections) {
+      const top = offsetsRef.current.get(id);
+      if (top !== undefined && top <= scrollPos) {
+        active = id;
       }
+    }
+
+    if (active !== activeRef.current) {
+      setActiveSection(active);
     }
   }, []);
 
   useEffect(() => {
+    buildOffsets();
+    const handleResize = () => buildOffsets();
+    window.addEventListener("resize", handleResize);
+
     let ticking = false;
     const handleScrollEvent = () => {
       if (!ticking) {
@@ -38,8 +60,13 @@ export default function Navbar() {
     };
 
     window.addEventListener("scroll", handleScrollEvent, { passive: true });
-    return () => window.removeEventListener("scroll", handleScrollEvent);
-  }, [handleScroll]);
+    handleScroll();
+
+    return () => {
+      window.removeEventListener("scroll", handleScrollEvent);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [buildOffsets, handleScroll]);
 
   useEffect(() => {
     if (mobileOpen) {

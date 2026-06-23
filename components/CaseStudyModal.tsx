@@ -1,5 +1,11 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ExternalLink, Check, Palette, Code, ChevronLeft, ChevronRight, Maximize2, Plus, Minus, RotateCcw } from "lucide-react";
+import {
+  X, ExternalLink, Check, Palette, Code,
+  ChevronLeft, ChevronRight, Maximize2,
+  Plus, Minus, RotateCcw,
+  Play, Pause, Expand, Minimize,
+  Info, HelpCircle
+} from "lucide-react";
 import { useEffect, useState, useCallback, useRef } from "react";
 import type { CaseStudy } from "../data/content";
 
@@ -17,26 +23,240 @@ function SectionHeading({ accent, children }: { accent: string; children: React.
   );
 }
 
+function LightboxControls({ visible }: { visible: boolean }) {
+  return (
+    <div
+      className={`absolute bottom-24 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 px-3 py-2 rounded-full bg-black/60 backdrop-blur-xl border border-white/10 transition-all duration-500 ${
+        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
+      }`}
+    >
+      {[
+        { key: "←→", label: "Navigate" },
+        { key: "+/-", label: "Zoom" },
+        { key: "0", label: "Reset" },
+        { key: "F", label: "Fullscreen" },
+        { key: "Space", label: "Slideshow" },
+        { key: "Esc", label: "Close" },
+      ].map((item) => (
+        <span key={item.key} className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10px] text-white/60 hover:text-white/90 hover:bg-white/10 transition-colors">
+          <kbd className="px-1.5 py-0.5 rounded bg-white/10 text-white/80 text-[9px] font-mono">{item.key}</kbd>
+          <span>{item.label}</span>
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function LightboxFilmstrip({
+  screenshots,
+  currentIndex,
+  onSelect,
+  accent,
+}: {
+  screenshots: { src: string; title: string }[];
+  currentIndex: number;
+  onSelect: (i: number) => void;
+  accent: string;
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!scrollRef.current) return;
+    const child = scrollRef.current.children[currentIndex] as HTMLElement | undefined;
+    if (child) {
+      child.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    }
+  }, [currentIndex]);
+
+  return (
+    <div
+      ref={scrollRef}
+      className="absolute bottom-4 left-4 right-4 z-20 flex gap-2 overflow-x-auto px-2 py-2 rounded-2xl bg-black/40 backdrop-blur-xl border border-white/10"
+      style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+      onClick={(e) => e.stopPropagation()}
+    >
+      {screenshots.map((shot, i) => (
+        <button
+          key={i}
+          onClick={() => onSelect(i)}
+          className={`relative shrink-0 w-16 h-10 md:w-20 md:h-12 rounded-lg overflow-hidden transition-all duration-300 ${
+            i === currentIndex
+              ? "ring-2 scale-105"
+              : "opacity-50 hover:opacity-80"
+          }`}
+          style={i === currentIndex ? { outline: `2px solid ${accent}` } : undefined}
+        >
+          <img
+            src={shot.src}
+            alt=""
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+          {i === currentIndex && (
+            <div
+              className="absolute inset-x-0 bottom-0 h-0.5"
+              style={{ background: accent }}
+            />
+          )}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export default function CaseStudyModal({ study, onClose }: CaseStudyModalProps) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [zoomLevel, setZoomLevel] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const imageRef = useRef<HTMLDivElement>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [slideshowActive, setSlideshowActive] = useState(false);
+  const [slideshowSpeed, setSlideshowSpeed] = useState(4000);
+  const [controlsVisible, setControlsVisible] = useState(true);
+  const [showShortcuts, setShowShortcuts] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState<Record<number, boolean>>({});
+  const [dragDirection, setDragDirection] = useState<"horizontal" | "vertical" | null>(null);
 
-  const handleLightboxClose = useCallback(() => { setZoomLevel(1); setOffset({ x: 0, y: 0 }); setLightboxIndex(null); }, []);
+  const imageRef = useRef<HTMLDivElement>(null);
+  const lightboxRef = useRef<HTMLDivElement>(null);
+  const controlsTimerRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
+  const slideshowTimerRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
+
+  // Touch tracking for swipe & pinch
+  const touchStartRef = useRef<{ x: number; y: number; time: number }>({ x: 0, y: 0, time: 0 });
+  const touchPinchRef = useRef<{ dist: number }>({ dist: 0 });
+  const touchLastTapRef = useRef<{ x: number; y: number; time: number }>({ x: 0, y: 0, time: 0 });
+  const touchCurrentRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+
+  // Preload adjacent images
+  const preloadedRef = useRef<Set<string>>(new Set());
+
+  const preloadImages = useCallback((index: number, screenshots: { src: string }[]) => {
+    const indices = [index - 1, index, index + 1].filter(
+      (i) => i >= 0 && i < screenshots.length
+    );
+    indices.forEach((i) => {
+      const src = screenshots[i].src;
+      if (!preloadedRef.current.has(src)) {
+        preloadedRef.current.add(src);
+        const img = new Image();
+        img.src = src;
+      }
+    });
+  }, []);
+
+  const totalScreenshots = study.screenshots?.length ?? 0;
+  const hasPrev = lightboxIndex !== null && lightboxIndex > 0;
+  const hasNext = lightboxIndex !== null && lightboxIndex < totalScreenshots - 1;
+
+  const handleLightboxClose = useCallback(() => {
+    setZoomLevel(1);
+    setOffset({ x: 0, y: 0 });
+    setLightboxIndex(null);
+    setSlideshowActive(false);
+    setIsFullscreen(false);
+    setShowInfo(false);
+  }, []);
 
   const zoomIn = useCallback(() => setZoomLevel((v) => Math.min(v + 0.5, 5)), []);
-  const zoomOut = useCallback(() => setZoomLevel((v) => Math.max(v - 0.5, 1)), []);
-  const resetZoom = useCallback(() => { setZoomLevel(1); setOffset({ x: 0, y: 0 }); }, []);
+  const zoomOut = useCallback(() => setZoomLevel((v) => Math.max(v - 0.5, 0.5)), []);
+  const resetZoom = useCallback(() => {
+    setZoomLevel(1);
+    setOffset({ x: 0, y: 0 });
+  }, []);
 
-  const handleWheel = useCallback((e: WheelEvent) => {
-    if (e.deltaY < 0) zoomIn();
-    else if (e.deltaY > 0 && zoomLevel > 1) zoomOut();
-    else if (e.deltaY > 0) resetZoom();
-  }, [zoomIn, zoomOut, resetZoom, zoomLevel]);
+  const goNext = useCallback(() => {
+    if (lightboxIndex !== null && study.screenshots && lightboxIndex < study.screenshots.length - 1) {
+      resetZoom();
+      setLightboxIndex(lightboxIndex + 1);
+    }
+  }, [lightboxIndex, study.screenshots, resetZoom]);
 
+  const goPrev = useCallback(() => {
+    if (lightboxIndex !== null && lightboxIndex > 0) {
+      resetZoom();
+      setLightboxIndex(lightboxIndex - 1);
+    }
+  }, [lightboxIndex, resetZoom]);
+
+  const toggleFullscreen = useCallback(async () => {
+    if (!document.fullscreenElement) {
+      try {
+        await document.documentElement.requestFullscreen();
+        setIsFullscreen(true);
+      } catch { /* ignored */ }
+    } else {
+      try {
+        await document.exitFullscreen();
+        setIsFullscreen(false);
+      } catch { /* ignored */ }
+    }
+  }, []);
+
+  const toggleSlideshow = useCallback(() => {
+    setSlideshowActive((prev) => !prev);
+  }, []);
+
+  // Slideshow timer
+  useEffect(() => {
+    if (!slideshowActive || lightboxIndex === null || !study.screenshots) return;
+    const screenshots = study.screenshots;
+    slideshowTimerRef.current = setTimeout(() => {
+      if (lightboxIndex < screenshots.length - 1) {
+        goNext();
+      } else {
+        setLightboxIndex(0);
+        resetZoom();
+      }
+    }, slideshowSpeed);
+    return () => {
+      if (slideshowTimerRef.current) window.clearTimeout(slideshowTimerRef.current);
+    };
+  }, [slideshowActive, lightboxIndex, study.screenshots, goNext, resetZoom, slideshowSpeed]);
+
+  // Fullscreen change listener
+  useEffect(() => {
+    const handler = () => {
+      if (!document.fullscreenElement) setIsFullscreen(false);
+    };
+    document.addEventListener("fullscreenchange", handler);
+    return () => document.removeEventListener("fullscreenchange", handler);
+  }, []);
+
+  // Preload images when lightbox index changes
+  useEffect(() => {
+    if (lightboxIndex !== null && study.screenshots) {
+      preloadImages(lightboxIndex, study.screenshots);
+    }
+  }, [lightboxIndex, study.screenshots, preloadImages]);
+
+  // Auto-hide controls
+  const showControlsTemporarily = useCallback(() => {
+    setControlsVisible(true);
+    if (controlsTimerRef.current) window.clearTimeout(controlsTimerRef.current);
+    controlsTimerRef.current = setTimeout(() => {
+      if (lightboxIndex !== null) setControlsVisible(false);
+    }, 3000);
+  }, [lightboxIndex]);
+
+  useEffect(() => {
+    if (lightboxIndex !== null) {
+      showControlsTemporarily();
+    }
+    return () => { if (controlsTimerRef.current) window.clearTimeout(controlsTimerRef.current); };
+  }, [lightboxIndex, showControlsTemporarily]);
+
+  // Hide controls when mouse stops moving
+  useEffect(() => {
+    if (lightboxIndex === null) return;
+    const handleMouseMove = () => showControlsTemporarily();
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, [lightboxIndex, showControlsTemporarily]);
+
+  // Body overflow + escape for modal
   useEffect(() => {
     document.body.style.overflow = "hidden";
     const handleEsc = (e: KeyboardEvent) => {
@@ -49,28 +269,41 @@ export default function CaseStudyModal({ study, onClose }: CaseStudyModalProps) 
     };
   }, [onClose, lightboxIndex]);
 
+  // Keyboard shortcuts for lightbox
   useEffect(() => {
     if (lightboxIndex === null || !study.screenshots) return;
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") handleLightboxClose();
-      if (e.key === "ArrowLeft") { resetZoom(); setLightboxIndex((prev) => prev !== null && prev > 0 ? prev - 1 : prev); }
-      if (e.key === "ArrowRight") { resetZoom(); setLightboxIndex((prev) => prev !== null && study.screenshots && prev < study.screenshots.length - 1 ? prev + 1 : prev); }
-      if ((e.key === "=" || e.key === "+") && lightboxIndex !== null) zoomIn();
-      if (e.key === "-" && lightboxIndex !== null) zoomOut();
-      if (e.key === "0" && lightboxIndex !== null) resetZoom();
+      if (e.key === "ArrowLeft") goPrev();
+      if (e.key === "ArrowRight") goNext();
+      if (e.key === "=" || e.key === "+") zoomIn();
+      if (e.key === "-") zoomOut();
+      if (e.key === "0") resetZoom();
+      if (e.key === "f" || e.key === "F") toggleFullscreen();
+      if (e.key === " ") { e.preventDefault(); toggleSlideshow(); }
+      if (e.key === "?") setShowShortcuts((prev) => !prev);
+      if (e.key === "i" || e.key === "I") setShowInfo((prev) => !prev);
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [lightboxIndex, study.screenshots, handleLightboxClose, zoomIn, zoomOut, resetZoom]);
+  }, [lightboxIndex, study.screenshots, handleLightboxClose, goPrev, goNext, zoomIn, zoomOut, resetZoom, toggleFullscreen, toggleSlideshow]);
 
+  // Scroll wheel zoom
   useEffect(() => {
     if (lightboxIndex === null) return;
     const el = imageRef.current;
     if (!el) return;
-    el.addEventListener("wheel", handleWheel, { passive: true });
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      if (e.deltaY < 0) zoomIn();
+      else if (e.deltaY > 0 && zoomLevel > 1) zoomOut();
+      else if (e.deltaY > 0) resetZoom();
+    };
+    el.addEventListener("wheel", handleWheel, { passive: false });
     return () => el.removeEventListener("wheel", handleWheel);
-  }, [lightboxIndex, handleWheel]);
+  }, [lightboxIndex, zoomLevel, zoomIn, zoomOut, resetZoom]);
 
+  // Mouse drag for panning
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (zoomLevel <= 1) return;
     setIsDragging(true);
@@ -83,6 +316,119 @@ export default function CaseStudyModal({ study, onClose }: CaseStudyModalProps) 
   }, [isDragging, zoomLevel, dragStart]);
 
   const handleMouseUp = useCallback(() => setIsDragging(false), []);
+
+  // Touch handlers
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    const touches = e.touches;
+    touchCurrentRef.current = { x: touches[0].clientX, y: touches[0].clientY };
+    touchStartRef.current = {
+      x: touches[0].clientX,
+      y: touches[0].clientY,
+      time: Date.now(),
+    };
+    setDragDirection(null);
+
+    if (touches.length === 2) {
+      const dx = touches[0].clientX - touches[1].clientX;
+      const dy = touches[0].clientY - touches[1].clientY;
+      touchPinchRef.current = { dist: Math.sqrt(dx * dx + dy * dy) };
+    }
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (lightboxIndex === null) return;
+    const touches = e.touches;
+
+    if (touches.length === 2) {
+      const dx = touches[0].clientX - touches[1].clientX;
+      const dy = touches[0].clientY - touches[1].clientY;
+      const newDist = Math.sqrt(dx * dx + dy * dy);
+      const prevDist = touchPinchRef.current.dist;
+      if (prevDist > 0) {
+        const scale = newDist / prevDist;
+        setZoomLevel((v) => Math.max(0.5, Math.min(v * scale, 5)));
+      }
+      touchPinchRef.current = { dist: newDist };
+      return;
+    }
+
+    if (touches.length === 1) {
+      const currentX = touches[0].clientX;
+      const currentY = touches[0].clientY;
+      const startX = touchStartRef.current.x;
+      const startY = touchStartRef.current.y;
+      const deltaX = currentX - startX;
+      const deltaY = currentY - startY;
+      touchCurrentRef.current = { x: currentX, y: currentY };
+
+      if (zoomLevel > 1) {
+        setOffset((prev) => ({
+          x: prev.x + deltaX - (touchCurrentRef.current.x - (currentX - deltaX)),
+          y: prev.y + deltaY - (touchCurrentRef.current.y - (currentY - deltaY)),
+        }));
+        touchStartRef.current = { x: currentX, y: currentY, time: Date.now() };
+        return;
+      }
+
+      if (!dragDirection) {
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+          setDragDirection("horizontal");
+        } else {
+          setDragDirection("vertical");
+        }
+      }
+    }
+  }, [lightboxIndex, zoomLevel, dragDirection]);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (lightboxIndex === null || !study.screenshots) return;
+    const touches = e.changedTouches;
+    if (touches.length !== 1) return;
+
+    const endX = touches[0].clientX;
+    const endY = touches[0].clientY;
+    const startX = touchStartRef.current.x;
+    const startY = touchStartRef.current.y;
+    const dx = endX - startX;
+    const dy = endY - startY;
+    const elapsed = Date.now() - touchStartRef.current.time;
+
+    // Double-tap detection
+    const lastTap = touchLastTapRef.current;
+    const tapDist = Math.hypot(endX - lastTap.x, endY - lastTap.y);
+    const tapTime = Date.now() - lastTap.time;
+    if (tapDist < 30 && tapTime < 300) {
+      if (zoomLevel > 1) {
+        resetZoom();
+      } else {
+        setZoomLevel(3);
+      }
+      touchLastTapRef.current = { x: 0, y: 0, time: 0 };
+      return;
+    }
+    touchLastTapRef.current = { x: endX, y: endY, time: Date.now() };
+
+    const absDx = Math.abs(dx);
+    const absDy = Math.abs(dy);
+    const isQuickSwipe = elapsed < 300;
+    const isFarEnough = absDx > 50 || absDy > 50;
+
+    if (!isFarEnough) return;
+
+    if (dragDirection === "vertical" || (absDy > absDx && absDy > 50)) {
+      if (dy > 50) handleLightboxClose();
+      return;
+    }
+
+    if (dragDirection === "horizontal" || (absDx > absDy && absDx > 50)) {
+      if (dx > 0 && isQuickSwipe) goPrev();
+      else if (dx < 0 && isQuickSwipe) goNext();
+    }
+  }, [lightboxIndex, study.screenshots, dragDirection, zoomLevel, handleLightboxClose, goPrev, goNext, resetZoom]);
+
+  const handleImageLoad = useCallback((index: number) => {
+    setImageLoaded((prev) => ({ ...prev, [index]: true }));
+  }, []);
 
   const accent = study.accentColor;
 
@@ -301,13 +647,14 @@ export default function CaseStudyModal({ study, onClose }: CaseStudyModalProps) 
                         className="group relative rounded-2xl overflow-hidden text-left transition-all duration-300 hover:-translate-y-1"
                         style={{ background: `${accent}04`, border: `1px solid ${accent}10` }}
                         whileHover={{ scale: 1.01 }}
-                        layoutId={`shot-${i}`}
                       >
                         <div className="aspect-video overflow-hidden relative">
                           <img
                             src={shot.src}
                             alt={shot.title}
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            loading="lazy"
+                            decoding="async"
                           />
                           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
                             <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-2 rounded-full bg-white/10 backdrop-blur-sm">
@@ -332,56 +679,47 @@ export default function CaseStudyModal({ study, onClose }: CaseStudyModalProps) 
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.3 }}
-                      className="fixed inset-0 z-[200] flex items-center justify-center p-4 md:p-8"
+                      ref={lightboxRef}
+                      className="fixed inset-0 z-[200] flex items-center justify-center p-0 md:p-4"
+                      onTouchStart={handleTouchStart}
+                      onTouchMove={handleTouchMove}
+                      onTouchEnd={handleTouchEnd}
                     >
+                      {/* Backdrop */}
                       <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={handleLightboxClose}
-                        className="absolute inset-0 bg-black/90 backdrop-blur-xl"
+                        className="absolute inset-0 bg-black/95 backdrop-blur-2xl"
                       />
 
+                      {/* Close button */}
                       <button
                         onClick={handleLightboxClose}
-                        className="absolute top-6 right-6 z-10 w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all"
+                        className={`absolute top-4 right-4 md:top-6 md:right-6 z-30 w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all ${
+                          controlsVisible ? "opacity-100" : "opacity-0"
+                        }`}
                       >
                         <X size={18} />
                       </button>
 
-                      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 px-4 py-2 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 text-white text-xs font-medium">
-                        {lightboxIndex + 1} / {study.screenshots.length}
-                      </div>
-
-                      {lightboxIndex > 0 && (
-                        <button
-                          onClick={() => setLightboxIndex(lightboxIndex - 1)}
-                          className="absolute left-4 md:left-8 z-10 w-12 h-12 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all hover:-translate-x-1"
-                        >
-                          <ChevronLeft size={22} />
-                        </button>
-                      )}
-
-                      {lightboxIndex < study.screenshots.length - 1 && (
-                        <button
-                          onClick={() => setLightboxIndex(lightboxIndex + 1)}
-                          className="absolute right-4 md:right-8 z-10 w-12 h-12 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all hover:translate-x-1"
-                        >
-                          <ChevronRight size={22} />
-                        </button>
-                      )}
-
-                      <div className="absolute top-6 left-6 z-10 flex items-center gap-2">
+                      {/* Top controls bar */}
+                      <div
+                        className={`absolute top-4 left-4 md:top-6 md:left-6 z-30 flex items-center gap-2 transition-all duration-300 ${
+                          controlsVisible ? "opacity-100" : "opacity-0"
+                        }`}
+                      >
                         <div className="flex items-center rounded-full bg-white/10 backdrop-blur-xl border border-white/20 overflow-hidden">
                           <button
                             onClick={(e) => { e.stopPropagation(); zoomOut(); }}
                             className="w-9 h-9 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all disabled:opacity-30"
-                            disabled={zoomLevel <= 1}
+                            disabled={zoomLevel <= 0.5}
                             title="Zoom out"
                           >
                             <Minus size={14} />
                           </button>
-                          <span className="text-white/80 text-xs font-medium tabular-nums w-10 text-center select-none">
+                          <span className="text-white/80 text-xs font-medium tabular-nums w-12 text-center select-none">
                             {Math.round(zoomLevel * 100)}%
                           </span>
                           <button
@@ -393,7 +731,7 @@ export default function CaseStudyModal({ study, onClose }: CaseStudyModalProps) 
                             <Plus size={14} />
                           </button>
                         </div>
-                        {zoomLevel > 1 && (
+                        {zoomLevel !== 1 && (
                           <button
                             onClick={(e) => { e.stopPropagation(); resetZoom(); }}
                             className="w-9 h-9 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/20 transition-all"
@@ -402,54 +740,226 @@ export default function CaseStudyModal({ study, onClose }: CaseStudyModalProps) 
                             <RotateCcw size={14} />
                           </button>
                         )}
+                        <div className="w-px h-6 bg-white/10 mx-1 hidden sm:block" />
+                        <button
+                          onClick={(e) => { e.stopPropagation(); toggleFullscreen(); }}
+                          className="w-9 h-9 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/20 transition-all"
+                          title={isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+                        >
+                          {isFullscreen ? <Minimize size={14} /> : <Expand size={14} />}
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); toggleSlideshow(); }}
+                          className={`w-9 h-9 rounded-full backdrop-blur-xl border flex items-center justify-center transition-all ${
+                            slideshowActive
+                              ? "bg-accent-cyan/20 border-accent-cyan/40 text-accent-cyan"
+                              : "bg-white/10 border-white/20 text-white/70 hover:text-white hover:bg-white/20"
+                          }`}
+                          title={slideshowActive ? "Stop slideshow" : "Start slideshow"}
+                        >
+                          {slideshowActive ? <Pause size={14} /> : <Play size={14} />}
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setShowInfo((prev) => !prev); }}
+                          className="w-9 h-9 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/20 transition-all"
+                          title="Image info"
+                        >
+                          <Info size={14} />
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setShowShortcuts((prev) => !prev); }}
+                          className="w-9 h-9 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/20 transition-all"
+                          title="Keyboard shortcuts"
+                        >
+                          <HelpCircle size={14} />
+                        </button>
                       </div>
 
+                      {/* Counter */}
+                      <div
+                        className={`absolute top-4 left-1/2 -translate-x-1/2 z-30 px-4 py-2 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 text-white text-xs font-medium transition-all duration-300 ${
+                          controlsVisible ? "opacity-100" : "opacity-0"
+                        }`}
+                      >
+                        {lightboxIndex + 1} / {study.screenshots.length}
+                        {slideshowActive && (
+                          <span className="ml-2 text-accent-cyan">
+                            <span className="animate-pulse">●</span>
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Prev / Next arrows on sides */}
+                      {hasPrev && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); goPrev(); }}
+                          className={`absolute left-2 md:left-6 z-20 w-10 h-10 md:w-12 md:h-12 rounded-full bg-black/50 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all hover:-translate-x-1 ${
+                            controlsVisible ? "opacity-100" : "opacity-0 md:opacity-0 lg:opacity-0"
+                          }`}
+                        >
+                          <ChevronLeft size={20} />
+                        </button>
+                      )}
+                      {hasNext && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); goNext(); }}
+                          className={`absolute right-2 md:right-6 z-20 w-10 h-10 md:w-12 md:h-12 rounded-full bg-black/50 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all hover:translate-x-1 ${
+                            controlsVisible ? "opacity-100" : "opacity-0 md:opacity-0 lg:opacity-0"
+                          }`}
+                        >
+                          <ChevronRight size={20} />
+                        </button>
+                      )}
+
+                      {/* Keyboard shortcuts guide */}
+                      <AnimatePresence>
+                        {showShortcuts && (
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            onClick={() => setShowShortcuts(false)}
+                            className="absolute inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+                          >
+                            <div
+                              className="p-6 rounded-2xl bg-bg-surface/90 backdrop-blur-xl border border-white/10 max-w-sm w-full mx-4"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <div className="flex items-center justify-between mb-4">
+                                <h3 className="font-heading text-sm font-bold text-white">Keyboard Shortcuts</h3>
+                                <button onClick={() => setShowShortcuts(false)} className="text-white/50 hover:text-white">
+                                  <X size={14} />
+                                </button>
+                              </div>
+                              <div className="space-y-2">
+                                {[
+                                  { keys: "← →", desc: "Previous / Next" },
+                                  { keys: "+ -", desc: "Zoom in / out" },
+                                  { keys: "0", desc: "Reset zoom" },
+                                  { keys: "F", desc: "Toggle fullscreen" },
+                                  { keys: "Space", desc: "Play / Pause slideshow" },
+                                  { keys: "I", desc: "Toggle image info" },
+                                  { keys: "?", desc: "Toggle this guide" },
+                                  { keys: "Esc", desc: "Close lightbox" },
+                                ].map((item) => (
+                                  <div key={item.keys} className="flex items-center justify-between py-1.5">
+                                    <div className="flex gap-1">
+                                      {item.keys.split(" ").map((k) => (
+                                        <kbd
+                                          key={k}
+                                          className="px-2 py-0.5 rounded bg-white/10 text-white/80 text-[10px] font-mono"
+                                        >
+                                          {k}
+                                        </kbd>
+                                      ))}
+                                    </div>
+                                    <span className="text-white/50 text-xs">{item.desc}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
+                      {/* Image info overlay */}
+                      <AnimatePresence>
+                        {showInfo && lightboxIndex !== null && study.screenshots && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 20 }}
+                            className="absolute bottom-24 left-4 right-4 md:left-auto md:right-6 md:max-w-xs z-30 p-4 rounded-2xl bg-black/80 backdrop-blur-xl border border-white/10"
+                          >
+                            <h4 className="text-white font-heading font-bold text-sm mb-1">
+                              {study.screenshots[lightboxIndex].title}
+                            </h4>
+                            <p className="text-white/60 text-xs leading-relaxed">
+                              {study.screenshots[lightboxIndex].description}
+                            </p>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
+                      {/* Main image */}
                       <motion.div
                         key={lightboxIndex}
-                        initial={{ opacity: 0, scale: 0.9 }}
+                        initial={{ opacity: 0, scale: 0.92 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
+                        exit={{ opacity: 0, scale: 0.92 }}
                         transition={{ duration: 0.3 }}
-                        className="relative z-10 w-full max-w-5xl flex flex-col"
+                        className="relative z-10 w-full h-full flex flex-col items-center justify-center"
                         onClick={(e) => e.stopPropagation()}
                       >
                         <div
                           ref={imageRef}
-                          className="relative flex-1 flex items-center justify-center overflow-hidden rounded-2xl select-none"
-                          style={{ maxHeight: "80vh" }}
+                          className="relative flex-1 flex items-center justify-center overflow-hidden select-none w-full"
+                          style={{ maxHeight: "85vh" }}
                           onMouseDown={handleMouseDown}
                           onMouseMove={handleMouseMove}
                           onMouseUp={handleMouseUp}
                           onMouseLeave={handleMouseUp}
                         >
+                          {!imageLoaded[lightboxIndex] && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="w-8 h-8 rounded-full border-2 border-white/20 border-t-accent-cyan animate-spin" />
+                            </div>
+                          )}
                           <img
                             src={study.screenshots[lightboxIndex].src}
                             alt={study.screenshots[lightboxIndex].title}
-                            className="rounded-2xl shadow-2xl pointer-events-none"
+                            className="pointer-events-none"
+                            onLoad={() => handleImageLoad(lightboxIndex)}
                             style={{
-                              maxWidth: zoomLevel > 1 ? "none" : "100%",
-                              maxHeight: zoomLevel > 1 ? "none" : "75vh",
+                              maxWidth: zoomLevel <= 1 ? "95vw" : "none",
+                              maxHeight: zoomLevel <= 1 ? "80vh" : "none",
                               width: zoomLevel > 1 ? `${zoomLevel * 100}%` : "auto",
                               height: zoomLevel > 1 ? `${zoomLevel * 100}%` : "auto",
-                              objectFit: zoomLevel > 1 ? "none" : "contain",
+                              objectFit: zoomLevel <= 1 ? "contain" : "none",
                               transform: zoomLevel > 1 ? `translate(${offset.x}px, ${offset.y}px)` : "none",
                               transition: isDragging ? "none" : "transform 0.2s ease-out, width 0.2s ease-out, height 0.2s ease-out",
                               cursor: zoomLevel > 1 ? (isDragging ? "grabbing" : "grab") : "default",
+                              opacity: imageLoaded[lightboxIndex] ? 1 : 0,
                             }}
                             draggable={false}
                           />
                         </div>
-                        {zoomLevel <= 1 && (
-                          <div className="text-center mt-4">
+
+                        {/* Image title (when not zoomed) */}
+                        {zoomLevel <= 1 && lightboxIndex !== null && (
+                          <div
+                            className={`text-center pb-16 md:pb-12 transition-all duration-300 ${
+                              controlsVisible ? "opacity-100" : "opacity-0"
+                            }`}
+                          >
                             <h4 className="text-white font-heading font-bold text-sm">
                               {study.screenshots[lightboxIndex].title}
                             </h4>
-                            <p className="text-white/60 text-xs mt-1">
+                            <p className="text-white/50 text-xs mt-1 max-w-md mx-auto line-clamp-1">
                               {study.screenshots[lightboxIndex].description}
                             </p>
                           </div>
                         )}
                       </motion.div>
+
+                      {/* Thumbnail filmstrip */}
+                      {study.screenshots.length > 1 && (
+                        <div
+                          className={`transition-all duration-500 ${
+                            controlsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+                          }`}
+                        >
+                          <LightboxFilmstrip
+                            screenshots={study.screenshots}
+                            currentIndex={lightboxIndex}
+                            onSelect={(i) => { resetZoom(); setLightboxIndex(i); }}
+                            accent={accent}
+                          />
+                        </div>
+                      )}
+
+                      {/* Bottom controls hint */}
+                      <LightboxControls visible={controlsVisible} />
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -481,29 +991,31 @@ export default function CaseStudyModal({ study, onClose }: CaseStudyModalProps) 
             ) : (
               <>
                 {/* Impact stats */}
-                <motion.div
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.15 }}
-                  className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16"
-                >
-                  {study.impact.map((stat, i) => (
-                    <div
-                      key={stat.label}
-                      className="relative rounded-2xl p-6 overflow-hidden"
-                      style={{ background: `linear-gradient(135deg, ${accent}08, ${accent}02)`, border: `1px solid ${accent}15` }}
-                    >
+                {study.impact && study.impact.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.15 }}
+                    className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16"
+                  >
+                    {study.impact.map((stat) => (
                       <div
-                        className="absolute top-0 right-0 w-24 h-24 rounded-full blur-3xl"
-                        style={{ background: `${accent}10` }}
-                      />
-                      <span className="block font-heading text-3xl md:text-4xl font-bold mb-1" style={{ color: accent }}>
-                        {stat.metric}
-                      </span>
-                      <span className="text-xs tracking-wider text-text-muted uppercase">{stat.label}</span>
-                    </div>
-                  ))}
-                </motion.div>
+                        key={stat.label}
+                        className="relative rounded-2xl p-6 overflow-hidden"
+                        style={{ background: `linear-gradient(135deg, ${accent}08, ${accent}02)`, border: `1px solid ${accent}15` }}
+                      >
+                        <div
+                          className="absolute top-0 right-0 w-24 h-24 rounded-full blur-3xl"
+                          style={{ background: `${accent}10` }}
+                        />
+                        <span className="block font-heading text-3xl md:text-4xl font-bold mb-1" style={{ color: accent }}>
+                          {stat.metric}
+                        </span>
+                        <span className="text-xs tracking-wider text-text-muted uppercase">{stat.label}</span>
+                      </div>
+                    ))}
+                  </motion.div>
+                )}
 
                 {/* Story section */}
                 <motion.div
@@ -518,7 +1030,7 @@ export default function CaseStudyModal({ study, onClose }: CaseStudyModalProps) 
                   </p>
                 </motion.div>
 
-                {/* Problem & Solution side by side */}
+                {/* Problem & Solution */}
                 <motion.div
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}

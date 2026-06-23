@@ -6,15 +6,34 @@ export default function LoadingScreen() {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 2400);
+    let cancelled = false;
+
+    const done = () => {
+      if (!cancelled) setLoading(false);
+    };
+
+    const timeout = setTimeout(done, 800);
+
     const progressInterval = setInterval(() => {
       setProgress((prev) => {
-        if (prev >= 100) return 100;
-        return prev + Math.random() * 12;
+        if (prev >= 90) return prev + 0.5;
+        return prev + Math.random() * 8;
       });
     }, 100);
+
+    if (document.readyState === "complete") {
+      clearTimeout(timeout);
+      done();
+    } else {
+      window.addEventListener("load", () => {
+        clearTimeout(timeout);
+        done();
+      });
+    }
+
     return () => {
-      clearTimeout(timer);
+      cancelled = true;
+      clearTimeout(timeout);
       clearInterval(progressInterval);
     };
   }, []);

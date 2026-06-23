@@ -1,47 +1,53 @@
-import { motion, type Variants } from "framer-motion";
-import { viewportOnce, staggerContainer, fadeUp } from "./animations";
+import { useRef, useState, useEffect, Children } from "react";
 
 type StaggerRevealProps = {
   children: React.ReactNode;
   className?: string;
-  childVariants?: Variants;
-  containerVariants?: Variants;
   delay?: number;
-  as?: "div" | "ul" | "ol";
+  staggerDelay?: number;
 };
 
 export default function StaggerReveal({
   children,
   className,
-  childVariants = fadeUp,
-  containerVariants = staggerContainer,
-  as: Tag = "div",
+  delay = 0.1,
+  staggerDelay = 0.08,
 }: StaggerRevealProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          observer.unobserve(el);
+        }
+      },
+      { rootMargin: "-80px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const items = Children.toArray(children);
+
   return (
-    <Tag className={className}>
-      {Array.isArray(children) ? (
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={viewportOnce}
+    <div ref={ref} className={className}>
+      {items.map((child, i) => (
+        <div
+          key={i}
+          style={{
+            opacity: visible ? 1 : 0,
+            transform: visible ? "translateY(0)" : "translateY(30px)",
+            transition: `opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay + i * staggerDelay}s, transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${delay + i * staggerDelay}s`,
+          }}
         >
-          {children.map((child, i) => (
-            <motion.div key={i} variants={childVariants}>
-              {child}
-            </motion.div>
-          ))}
-        </motion.div>
-      ) : (
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={viewportOnce}
-        >
-          <motion.div variants={childVariants}>{children}</motion.div>
-        </motion.div>
-      )}
-    </Tag>
+          {child}
+        </div>
+      ))}
+    </div>
   );
 }

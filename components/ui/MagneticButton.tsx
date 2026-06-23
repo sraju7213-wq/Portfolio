@@ -1,6 +1,5 @@
 import { useRef, useCallback } from "react";
 import { motion } from "framer-motion";
-import { buttonHover } from "./animations";
 
 type MagneticButtonProps = {
   children: React.ReactNode;
@@ -52,14 +51,24 @@ export default function MagneticButton({
 
   if (href) {
     return (
-      <motion.a href={href} {...buttonHover} className={className}>
+      <motion.a
+        href={href}
+        whileHover={{ scale: 1.04, y: -2 }}
+        whileTap={{ scale: 0.97 }}
+        className={className}
+      >
         {inner}
       </motion.a>
     );
   }
 
   return (
-    <motion.button onClick={onClick} {...buttonHover} className={className}>
+    <motion.button
+      onClick={onClick}
+      whileHover={{ scale: 1.04, y: -2 }}
+      whileTap={{ scale: 0.97 }}
+      className={className}
+    >
       {inner}
     </motion.button>
   );

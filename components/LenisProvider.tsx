@@ -1,9 +1,5 @@
 import { useEffect, useRef } from "react";
 import Lenis from "lenis";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
 
 export default function LenisProvider({ children }: { children: React.ReactNode }) {
   const lenisRef = useRef<Lenis | null>(null);
@@ -14,20 +10,20 @@ export default function LenisProvider({ children }: { children: React.ReactNode 
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
       wheelMultiplier: 1,
-      touchMultiplier: 1.5,
+      syncTouch: false,
+      touchMultiplier: 1,
     });
 
     lenisRef.current = lenis;
 
-    // Connect GSAP ScrollTrigger to Lenis
-    lenis.on("scroll", ScrollTrigger.update);
-    gsap.ticker.add((time) => lenis.raf(time * 1000));
-    gsap.ticker.lagSmoothing(0);
+    function raf(time: number) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
 
-    // Expose lenis globally
     (window as any).lenis = lenis;
 
-    // Fix anchor links
     const handleAnchorClick = (e: MouseEvent) => {
       const target = (e.target as HTMLElement).closest('a[href^="#"]');
       if (!target) return;
@@ -46,7 +42,6 @@ export default function LenisProvider({ children }: { children: React.ReactNode 
       lenis.destroy();
       (window as any).lenis = undefined;
       document.removeEventListener("click", handleAnchorClick);
-      gsap.ticker.remove((time) => lenis.raf(time * 1000));
     };
   }, []);
 

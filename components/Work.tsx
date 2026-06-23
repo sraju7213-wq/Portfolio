@@ -1,71 +1,194 @@
-import { useState } from "react";
+import { useRef, useCallback, useState, lazy, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ExternalLink, ArrowRight, ArrowUpRight, X } from "lucide-react";
+import { ExternalLink, ArrowRight, X, Eye } from "lucide-react";
 import { portfolioCategories, portfolioProjects, caseStudies } from "../data/content";
 import type { CaseStudy } from "../data/content";
 import SectionHeader from "./ui/SectionHeader";
 import Reveal from "./ui/Reveal";
-import CaseStudyModal from "./CaseStudyModal";
+import ProjectThumbnail from "./ui/ProjectThumbnail";
+import { useIsMobile } from "../hooks";
+
+const CaseStudyModal = lazy(() => import("./CaseStudyModal"));
 
 const accentMap: Record<string, string> = {
   Web: "text-cyan-400",
   Branding: "text-emerald-400",
-  Motion: "text-teal-400",
   Graphics: "text-pink-400",
 };
+
+function TiltCard({ children, className, disabled = false }: { children: React.ReactNode; className?: string; disabled?: boolean }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (isMobile || disabled || !ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    setTilt({
+      x: (y - 0.5) * -6,
+      y: (x - 0.5) * 6,
+    });
+  }, [isMobile, disabled]);
+
+  const handleMouseLeave = useCallback(() => {
+    setTilt({ x: 0, y: 0 });
+  }, []);
+
+  return (
+    <motion.div
+      ref={ref}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      className={className}
+      style={{ perspective: "1200px" }}
+    >
+      <motion.div
+        animate={{
+          rotateX: tilt.x,
+          rotateY: tilt.y,
+        }}
+        transition={{ type: "spring", stiffness: 250, damping: 30, mass: 0.5 }}
+        style={{ transformStyle: "preserve-3d" }}
+      >
+        {children}
+      </motion.div>
+    </motion.div>
+  );
+}
 
 function BentoCard({
   study,
   onClick,
+  variant = "default",
 }: {
   study: CaseStudy;
   onClick: () => void;
+  variant?: "default" | "horizontal";
 }) {
   const accent = study.accentColor;
-  return (
-    <motion.button
-      onClick={onClick}
-      className="group relative text-left overflow-hidden rounded-3xl border border-white/[0.06] bg-bg-surface/50 backdrop-blur-sm transition-all duration-500 hover:-translate-y-1 hover:shadow-lg hover:shadow-black/20"
-    >
-      <div className="relative h-40 md:h-48 overflow-hidden">
-        <div className={`absolute inset-0 bg-gradient-to-br ${study.coverGradient}`} />
-        <div className="absolute inset-0 bg-gradient-to-t from-bg-primary/80 via-transparent to-transparent" />
-        <div className="absolute top-4 right-4 z-10">
-          <span
-            className="px-3 py-1.5 rounded-lg text-[10px] font-semibold tracking-wider uppercase backdrop-blur-xl"
-            style={{ background: `${accent}15`, color: accent, border: `1px solid ${accent}25` }}
-          >
-            {study.category}
-          </span>
+  const thumbnailSrc = study.screenshots?.[0]?.src;
+  const hasImage = !!thumbnailSrc;
+  const bustedThumbnailSrc = thumbnailSrc ? `${thumbnailSrc}?v=2` : undefined;
+
+  const commonClasses =
+    "group relative w-full text-left overflow-hidden rounded-3xl border border-white/[0.06] transition-all duration-500 hover:-translate-y-1 hover:shadow-lg hover:shadow-black/20";
+
+  const bg = (
+    <>
+      {hasImage && (
+        <div className="absolute inset-0 overflow-hidden rounded-3xl">
+          <img
+            src={bustedThumbnailSrc}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover object-top brightness-[1.05] contrast-[1.05] scale-[1.08] opacity-75 group-hover:scale-[1.12] transition-transform duration-700"
+            draggable={false}
+            loading="lazy"
+            decoding="async"
+          />
+          {/* Subtle gradient only behind the text area */}
+          <div className="absolute bottom-0 inset-x-0 h-[65%] bg-gradient-to-t from-bg-primary via-bg-primary/80 to-transparent z-[5]" />
+          {/* Soft top gradient to prevent badge clash */}
+          <div className="absolute top-0 inset-x-0 h-[20%] bg-gradient-to-b from-bg-primary/20 to-transparent z-[5]" />
+          {/* Ambient accent glow */}
+          <div
+            className="absolute inset-0 opacity-[0.10] z-[6]"
+            style={{
+              background: `radial-gradient(ellipse at 30% 40%, ${accent}40 0%, transparent 70%)`,
+            }}
+          />
         </div>
-        <div className="absolute bottom-4 left-6 right-6 z-10">
-          <h3 className="font-heading text-xl font-bold text-white mb-1">{study.title}</h3>
-          <p className="text-sm text-white/70 line-clamp-1">{study.subtitle}</p>
-        </div>
-      </div>
-      <div className="p-5">
-        <p className="text-text-secondary text-sm leading-relaxed line-clamp-2 mb-4">{study.overview || study.story}</p>
-        <div className="flex flex-wrap gap-3 mb-4">
-          {(study.impact.length > 0 ? study.impact : study.results?.slice(0, 3).map(r => ({ metric: "✓", label: r })) || []).map((stat, i) => (
-            <div
-              key={i}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs backdrop-blur-sm"
-              style={{ background: `${accent}08`, border: `1px solid ${accent}12` }}
-            >
-              <span className="font-semibold" style={{ color: accent }}>{stat.metric}</span>
-              <span className="text-text-muted">{stat.label}</span>
+      )}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:60px_60px] opacity-30 z-[7]" />
+    </>
+  );
+
+  if (variant === "horizontal") {
+    return (
+      <TiltCard disabled>
+        <motion.button onClick={onClick} className={commonClasses}>
+          {bg}
+          <div className="relative z-10 flex flex-col md:flex-row">
+            <div className="relative w-full md:w-[280px] lg:w-[340px] shrink-0 h-44 md:h-auto overflow-hidden rounded-2xl m-3 md:m-4 shadow-lg shadow-black/40 border border-white/[0.04]">
+              <ProjectThumbnail
+                src={bustedThumbnailSrc}
+                alt={study.title}
+                gradient={study.coverGradient}
+                accent={accent}
+                className="absolute inset-0 rounded-2xl"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-bg-primary/30 to-transparent pointer-events-none" />
             </div>
-          ))}
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {(study.technologies.length > 0 ? study.technologies : [...(study.techStack?.design || []), ...(study.techStack?.development || [])]).slice(0, 4).map((tech) => (
-            <span key={tech} className="px-2.5 py-1 rounded-md text-[10px] font-medium text-text-muted bg-white/[0.03] border border-white/[0.06]">
-              {tech}
+            <div className="flex-1 p-5 md:p-6 flex flex-col justify-center">
+              <span
+                className="inline-block px-3 py-1 rounded-lg text-[10px] font-semibold tracking-wider uppercase mb-3 w-fit"
+                style={{ background: `${accent}20`, color: accent, border: `1px solid ${accent}30` }}
+              >
+                {study.category}
+              </span>
+              <h3 className="font-heading text-xl md:text-2xl font-bold text-white mb-2">{study.title}</h3>
+              <p className="text-white/60 text-sm leading-relaxed line-clamp-2 mb-4">{study.subtitle}</p>
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="flex items-center gap-2 text-accent-cyan text-xs font-medium">
+                  <Eye size={14} />
+                  Explore Case Study
+                </span>
+                <span className="text-white/40 text-xs">{study.year}</span>
+                <span className="text-white/40 text-xs">{study.duration}</span>
+              </div>
+            </div>
+          </div>
+        </motion.button>
+      </TiltCard>
+    );
+  }
+
+  return (
+    <TiltCard>
+      <motion.button onClick={onClick} className={commonClasses}>
+        {bg}
+        <div className="relative z-10 p-5 flex flex-col h-full min-h-[320px]">
+          <div className="flex items-start justify-between mb-3">
+            <span
+              className="px-3 py-1.5 rounded-lg text-[10px] font-semibold tracking-wider uppercase backdrop-blur-xl"
+              style={{ background: `${accent}20`, color: accent, border: `1px solid ${accent}30` }}
+            >
+              {study.category}
             </span>
-          ))}
+          </div>
+
+          <div className="mt-auto">
+            <div className="mb-3">
+              <h3 className="font-heading text-xl font-bold text-white mb-1">{study.title}</h3>
+              <p className="text-white/60 text-sm line-clamp-2">{study.subtitle}</p>
+            </div>
+
+            <div className="flex flex-wrap gap-2 mb-3">
+              {(study.results || []).slice(0, 3).map((r, i) => (
+                <span
+                  key={i}
+                  className="px-2.5 py-1 rounded-md text-[10px] font-medium backdrop-blur-sm"
+                  style={{ background: `${accent}15`, color: accent, border: `1px solid ${accent}20` }}
+                >
+                  {r}
+                </span>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2 text-white/40 text-[11px]">
+              <span>{study.year}</span>
+              <span className="w-1 h-1 rounded-full bg-white/20" />
+              <span>{study.duration}</span>
+            </div>
+          </div>
+
+          <div className="absolute bottom-5 right-5 flex items-center gap-1.5 text-accent-cyan text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+            View Details <ArrowRight size={12} />
+          </div>
         </div>
-      </div>
-    </motion.button>
+      </motion.button>
+    </TiltCard>
   );
 }
 
@@ -95,61 +218,63 @@ function ProjectCard({
 }) {
   const accentClass = accentMap[project.category] || "text-cyan-400";
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.4, delay: index * 0.04 }}
-      className="group relative bg-bg-card/60 backdrop-blur-sm rounded-xl border border-border-subtle overflow-hidden hover:border-accent-cyan/20 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-accent-cyan/5"
-    >
-      <div className="absolute inset-0 bg-grid opacity-20" />
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-bg-primary/60" />
+    <TiltCard>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 0.4, delay: index * 0.04 }}
+        className="group relative bg-bg-card/60 backdrop-blur-sm rounded-xl border border-border-subtle overflow-hidden hover:border-accent-cyan/20 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-accent-cyan/5"
+      >
+        <div className="absolute inset-0 bg-grid opacity-20" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-bg-primary/60" />
 
-      <div className="relative p-5">
-        <div className="flex items-center gap-2 mb-3">
-          <span className={`text-[9px] font-medium tracking-wider uppercase ${accentClass}`}>
-            {project.category}
-          </span>
-          <div className="h-px flex-1 bg-gradient-to-r from-current to-transparent opacity-20" />
-        </div>
-
-        <h3 className="font-heading text-base font-semibold text-text-primary mb-1 line-clamp-1 group-hover:text-accent-cyan transition-colors">
-          {project.title}
-        </h3>
-        <p className="text-text-muted text-xs leading-relaxed line-clamp-2 mb-3">
-          {project.description}
-        </p>
-
-        {project.tags && project.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-3">
-            {project.tags.slice(0, 3).map((tag) => (
-              <span key={tag} className="px-2 py-0.5 text-[9px] rounded-md bg-bg-elevated/50 border border-border-subtle text-text-muted">
-                {tag}
-              </span>
-            ))}
+        <div className="relative p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <span className={`text-[9px] font-medium tracking-wider uppercase ${accentClass}`}>
+              {project.category}
+            </span>
+            <div className="h-px flex-1 bg-gradient-to-r from-current to-transparent opacity-20" />
           </div>
-        )}
 
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => onOpen(project)}
-            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-bg-elevated/80 border border-border-subtle text-xs text-text-secondary hover:text-white hover:border-accent-cyan/30 transition-all"
-          >
-            Details <ArrowRight size={10} />
-          </button>
-          {project.link && (
-            <a
-              href={project.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent-cyan to-accent-violet text-bg-primary flex items-center justify-center hover:shadow-lg hover:shadow-accent-cyan/20 transition-all"
-            >
-              <ExternalLink size={12} />
-            </a>
+          <h3 className="font-heading text-base font-semibold text-text-primary mb-1 line-clamp-1 group-hover:text-accent-cyan transition-colors">
+            {project.title}
+          </h3>
+          <p className="text-text-muted text-xs leading-relaxed line-clamp-2 mb-3">
+            {project.description}
+          </p>
+
+          {project.tags && project.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {project.tags.slice(0, 3).map((tag) => (
+                <span key={tag} className="px-2 py-0.5 text-[9px] rounded-md bg-bg-elevated/50 border border-border-subtle text-text-muted">
+                  {tag}
+                </span>
+              ))}
+            </div>
           )}
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => onOpen(project)}
+              className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-bg-elevated/80 border border-border-subtle text-xs text-text-secondary hover:text-white hover:border-accent-cyan/30 transition-all"
+            >
+              Details <ArrowRight size={10} />
+            </button>
+            {project.link && (
+              <a
+                href={project.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent-cyan to-accent-violet text-bg-primary flex items-center justify-center hover:shadow-lg hover:shadow-accent-cyan/20 transition-all"
+              >
+                <ExternalLink size={12} />
+              </a>
+            )}
+          </div>
         </div>
-      </div>
-    </motion.div>
+      </motion.div>
+    </TiltCard>
   );
 }
 
@@ -257,43 +382,28 @@ export default function Work() {
 
         {/* Case studies bento grid */}
         <Reveal delay={0.1}>
-          <div className="grid md:grid-cols-3 gap-4 mb-12">
-            <div className="md:col-span-2">
-              <BentoCard
-                study={caseStudies[0]}
-                onClick={() => setSelectedStudy(caseStudies[0])}
-              />
-            </div>
-            <div>
-              <BentoCard
-                study={caseStudies[1]}
-                onClick={() => setSelectedStudy(caseStudies[1])}
-              />
-            </div>
-            <div>
-              <BentoCard
-                study={caseStudies[3]}
-                onClick={() => setSelectedStudy(caseStudies[3])}
-              />
-            </div>
-            <div>
-              <BentoCard
-                study={caseStudies[4]}
-                onClick={() => setSelectedStudy(caseStudies[4])}
-              />
-            </div>
-            <div>
-              <BentoCard
-                study={caseStudies[5]}
-                onClick={() => setSelectedStudy(caseStudies[5])}
-              />
-            </div>
-            <div>
-              <BentoCard
-                study={caseStudies[2]}
-                onClick={() => setSelectedStudy(caseStudies[2])}
-              />
-            </div>
+          <div className="grid md:grid-cols-3 gap-4 mb-16">
+            {caseStudies.map((study, i) => {
+              if (i === 0) {
+                return (
+                  <div key={study.id} className="md:col-span-2 md:row-span-1">
+                    <BentoCard study={study} onClick={() => setSelectedStudy(study)} />
+                  </div>
+                );
+              }
+              if (i === caseStudies.length - 1) {
+                return (
+                  <div key={study.id} className="md:col-span-3">
+                    <BentoCard study={study} onClick={() => setSelectedStudy(study)} variant="horizontal" />
+                  </div>
+                );
+              }
+              return (
+                <div key={study.id}>
+                  <BentoCard study={study} onClick={() => setSelectedStudy(study)} />
+                </div>
+              );
+            })}
           </div>
         </Reveal>
 
@@ -339,10 +449,12 @@ export default function Work() {
 
       {/* Modals */}
       {selectedStudy && (
-        <CaseStudyModal
-          study={selectedStudy}
-          onClose={() => setSelectedStudy(null)}
-        />
+        <Suspense fallback={null}>
+          <CaseStudyModal
+            study={selectedStudy}
+            onClose={() => setSelectedStudy(null)}
+          />
+        </Suspense>
       )}
       <AnimatePresence>
         {selectedProject && (

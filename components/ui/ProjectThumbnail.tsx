@@ -6,6 +6,7 @@ type Props = {
   gradient?: string;
   accent?: string;
   className?: string;
+  imgClassName?: string;
 };
 
 export default function ProjectThumbnail({
@@ -14,6 +15,7 @@ export default function ProjectThumbnail({
   gradient = "from-accent-aurora/20 to-accent-nebula/20",
   accent = "#6366f1",
   className = "",
+  imgClassName = "",
 }: Props) {
   const [loaded, setLoaded] = useState(false);
   const [errored, setErrored] = useState(false);
@@ -30,9 +32,9 @@ export default function ProjectThumbnail({
           loading="lazy"
           onLoad={() => setLoaded(true)}
           onError={() => setErrored(true)}
-          className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ${
-            loaded ? "opacity-100 scale-100" : "opacity-0 scale-105"
-          }`}
+          className={`absolute inset-0 w-full h-full object-cover object-top brightness-[1.05] contrast-[1.05] transition-all duration-700 ${
+            loaded ? "opacity-100 scale-[1.08]" : "opacity-0 scale-[1.12]"
+          } ${imgClassName}`}
         />
       )}
 

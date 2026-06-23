@@ -271,17 +271,17 @@ export const caseStudies: CaseStudy[] = [
       development: ["React", "Next.js", "Tailwind CSS", "Firebase"]
     },
     screenshots: [
-      { src: "/images/valley-wedding-cars/screenshot-01.png", title: "Homepage", description: "Premium landing page designed to create a luxury first impression and encourage bookings." },
-      { src: "/images/valley-wedding-cars/screenshot-02.png", title: "Fleet Page", description: "Luxury vehicle catalog with categories, pricing, and quick booking options." },
-      { src: "/images/valley-wedding-cars/screenshot-03.png", title: "About Us", description: "Brand story and trust-building page showcasing the company's identity." },
-      { src: "/images/valley-wedding-cars/screenshot-04.png", title: "Contact Page", description: "Inquiry form with WhatsApp integration, Google Maps, and contact information." },
-      { src: "/images/valley-wedding-cars/screenshot-05.png", title: "Admin Login", description: "Secure authentication for administrators." },
-      { src: "/images/valley-wedding-cars/screenshot-06.png", title: "Messages Management", description: "Manage customer inquiries and leads from a centralized dashboard." },
-      { src: "/images/valley-wedding-cars/screenshot-07.png", title: "Package Management", description: "Create and manage wedding service packages with pricing and activation controls." },
-      { src: "/images/valley-wedding-cars/screenshot-08.png", title: "Vehicle Management", description: "Manage fleet, pricing, discounts, vehicle status, and display order." },
-      { src: "/images/valley-wedding-cars/screenshot-09.png", title: "Booking Calendar", description: "Visual scheduling system to prevent conflicts and manage vehicle availability." },
-      { src: "/images/valley-wedding-cars/screenshot-10.png", title: "Bookings Dashboard", description: "Track bookings by status, customer details, payment, and service type." },
-      { src: "/images/valley-wedding-cars/screenshot-11.png", title: "Estimate System", description: "Generate, manage, and send professional customer quotations." }
+      { src: "/images/valley-wedding-cars/screenshot-01.webp", title: "Homepage", description: "Premium landing page designed to create a luxury first impression and encourage bookings." },
+      { src: "/images/valley-wedding-cars/screenshot-02.webp", title: "Fleet Page", description: "Luxury vehicle catalog with categories, pricing, and quick booking options." },
+      { src: "/images/valley-wedding-cars/screenshot-03.webp", title: "About Us", description: "Brand story and trust-building page showcasing the company's identity." },
+      { src: "/images/valley-wedding-cars/screenshot-04.webp", title: "Contact Page", description: "Inquiry form with WhatsApp integration, Google Maps, and contact information." },
+      { src: "/images/valley-wedding-cars/screenshot-05.webp", title: "Admin Login", description: "Secure authentication for administrators." },
+      { src: "/images/valley-wedding-cars/screenshot-06.webp", title: "Messages Management", description: "Manage customer inquiries and leads from a centralized dashboard." },
+      { src: "/images/valley-wedding-cars/screenshot-07.webp", title: "Package Management", description: "Create and manage wedding service packages with pricing and activation controls." },
+      { src: "/images/valley-wedding-cars/screenshot-08.webp", title: "Vehicle Management", description: "Manage fleet, pricing, discounts, vehicle status, and display order." },
+      { src: "/images/valley-wedding-cars/screenshot-09.webp", title: "Booking Calendar", description: "Visual scheduling system to prevent conflicts and manage vehicle availability." },
+      { src: "/images/valley-wedding-cars/screenshot-10.webp", title: "Bookings Dashboard", description: "Track bookings by status, customer details, payment, and service type." },
+      { src: "/images/valley-wedding-cars/screenshot-11.webp", title: "Estimate System", description: "Generate, manage, and send professional customer quotations." }
     ],
     results: [
       "Complete business management platform",
@@ -337,11 +337,11 @@ export const caseStudies: CaseStudy[] = [
       development: ["React", "Next.js", "Tailwind CSS", "Supabase"]
     },
     screenshots: [
-      { src: "/images/tol-feedback/feedback-form.png", title: "Customer Feedback Form", description: "Mobile-first feedback form with experience ratings, recommendations, issue reporting, and customer comments." },
-      { src: "/images/tol-feedback/overview.png", title: "Dashboard Overview", description: "Business dashboard displaying customer satisfaction, recommendations, Net Promoter Score, and reported issues." },
-      { src: "/images/tol-feedback/analytics.png", title: "Analytics Dashboard", description: "Visual analytics showing feedback trends, submission activity, peak hours, and engagement insights." },
-      { src: "/images/tol-feedback/feedbacks.png", title: "Feedback Management", description: "Search, filter, and manage customer feedback with ratings, features, issues, and recommendations." },
-      { src: "/images/tol-feedback/settings.png", title: "Dashboard Settings", description: "Customizable preferences including display options, auto-refresh, exports, and security settings." }
+      { src: "/images/tol-feedback/feedback-form.webp", title: "Customer Feedback Form", description: "Mobile-first feedback form with experience ratings, recommendations, issue reporting, and customer comments." },
+      { src: "/images/tol-feedback/overview.webp", title: "Dashboard Overview", description: "Business dashboard displaying customer satisfaction, recommendations, Net Promoter Score, and reported issues." },
+      { src: "/images/tol-feedback/analytics.webp", title: "Analytics Dashboard", description: "Visual analytics showing feedback trends, submission activity, peak hours, and engagement insights." },
+      { src: "/images/tol-feedback/feedbacks.webp", title: "Feedback Management", description: "Search, filter, and manage customer feedback with ratings, features, issues, and recommendations." },
+      { src: "/images/tol-feedback/settings.webp", title: "Dashboard Settings", description: "Customizable preferences including display options, auto-refresh, exports, and security settings." }
     ],
     results: [
       "Digitized customer feedback collection",
@@ -351,49 +351,6 @@ export const caseStudies: CaseStudy[] = [
       "Mobile-friendly customer experience",
       "Scalable admin dashboard"
     ]
-  },
-  {
-    id: "tree-of-life-cafe",
-    title: "Tree of Life Cafe",
-    category: "Brand Identity & Web",
-    subtitle: "A brand identity that tastes as warm as the chai — logo, menu, signage, and digital presence for a cafe that feels like home",
-    heroColor: "from-amber-500/20 to-orange-500/20",
-    accentColor: "#f59e0b",
-    gradientFrom: "from-amber-500",
-    gradientTo: "to-orange-500",
-    coverGradient: "from-amber-500/10 via-orange-500/5 to-transparent",
-    previewLabel: "Brand Identity",
-    story: "A nature-inspired cafe in Kashmir wanted to be more than a place to eat — they wanted an experience. A space where people slow down, connect, and feel at home. I translated that warmth into a complete visual identity: logo, menu layout, signage, Instagram presence, and a lightweight booking app. Every touchpoint designed to feel as good as the space itself.",
-    problem: "The cafe had no brand identity — no logo, no consistent visual language, no web presence beyond a basic Instagram page. The menu and signage were ad-hoc, lacking cohesion. They needed a complete system across print, digital, and physical spaces that captured their warm, earthy atmosphere.",
-    solution: "Created a holistic brand rooted in earth tones, organic shapes, and handcrafted aesthetics. The logo combines a tree motif with warm amber gradients. The system extends across a 12-page illustrated menu, social templates, signage, and a digital booking app — all speaking the same visual language.",
-    process: [
-      "Immersed in the cafe space to absorb ambiance, customer vibe, and owner vision",
-      "Developed mood boards around earth tones, organic textures, handcrafted typography",
-      "Designed the logo — stylized tree crown with warm amber-citrine gradients",
-      "Laid out the full menu with illustrated food sections and tiered pricing",
-      "Built Instagram templates for stories, posts, reels, and highlight covers",
-      "Created the digital booking app with cafe ambiance imagery",
-      "Designed signage for entrance, interior wayfinding, and print collateral"
-    ],
-    finalVisuals: [
-      "Custom logotype with tree-of-life symbolism in warm amber gradients",
-      "12-page illustrated menu layout with food photography sections",
-      "Full Instagram brand kit — story templates, post layouts, covers",
-      "Minimalist booking app with atmospheric cafe imagery",
-      "Print collateral — business cards, coasters, table tents, signage",
-      "Palette: warm ambers, terracotta, cream, forest green accents"
-    ],
-    technologies: ["Adobe Photoshop", "MidJourney", "Figma", "React", "Tailwind CSS", "Netlify"],
-    impact: [
-      { metric: "3x", label: "Social Engagement" },
-      { metric: "100%", label: "Brand Consistency" },
-      { metric: "New", label: "Digital Presence" },
-      { metric: "Unified", label: "Customer Experience" }
-    ],
-    liveLink: "http://tolform.vercel.app/",
-    year: "2025",
-    role: "Brand Designer & Web Developer",
-    duration: "2 Months"
   },
   {
     id: "jugaadvision-ai",
@@ -435,102 +392,54 @@ export const caseStudies: CaseStudy[] = [
     ],
     liveLink: "https://jugaadvision.vercel.app/",
     year: "2025",
-    role: "Founder & Full-Stack Developer",
-    duration: "4 Months"
+    role: "Product Designer • UI/UX Designer • Frontend Developer",
+    duration: "4 Months",
+    overview: "Designed and developed an AI-powered creative workspace that helps designers, marketers, and businesses generate professional prompts, edit images, create AI artwork, and streamline creative workflows from a single platform.",
+    challenge: "Creative professionals often switch between multiple AI tools for prompt writing, image generation, editing, and brainstorming. The goal was to unify these workflows into one intuitive platform that improves speed and consistency.",
+    solution_points: [
+      "Designed a modular AI workspace",
+      "Built advanced prompt engineering tools",
+      "Created image generation and editing interfaces",
+      "Developed reusable prompt templates",
+      "Optimized workflows for designers and marketing teams"
+    ],
+    keyFeatures: [
+      "AI Prompt Builder",
+      "Pro Prompter",
+      "Batch Prompt Generator",
+      "Creative Mixer",
+      "Image-to-Prompt Conversion",
+      "AI Image Generator",
+      "AI Image Editor",
+      "Responsive SaaS Dashboard"
+    ],
+    techStack: {
+      design: ["Figma", "Photoshop"],
+      development: ["React", "Next.js", "Tailwind CSS"]
+    },
+    screenshots: [
+      { src: "/images/jugaadvision-ai/homepage.webp", title: "Homepage", description: "Landing page introducing the AI creative platform with a modern SaaS interface and quick access to creative tools." },
+      { src: "/images/jugaadvision-ai/prompt-builder.webp", title: "Prompt Builder", description: "Beginner-friendly prompt builder with structured inputs for generating high-quality AI prompts." },
+      { src: "/images/jugaadvision-ai/pro-prompter.webp", title: "Pro Prompter", description: "Advanced prompt engineering workspace with detailed controls for professional AI content creation." },
+      { src: "/images/jugaadvision-ai/batch-prompt-generator.webp", title: "Batch Prompt Generator", description: "Generate multiple optimized prompts simultaneously to accelerate creative production." },
+      { src: "/images/jugaadvision-ai/creative-mixer.webp", title: "Creative Mixer", description: "Combine styles, references, and creative elements to build unique AI prompts." },
+      { src: "/images/jugaadvision-ai/image-to-prompt.webp", title: "Image to Prompt", description: "Convert reference images into detailed prompts for AI image generation." },
+      { src: "/images/jugaadvision-ai/image-generator.webp", title: "AI Image Generator", description: "Generate high-quality AI artwork using structured prompts and customizable settings." },
+      { src: "/images/jugaadvision-ai/image-editor.webp", title: "AI Image Editor", description: "Edit, enhance, and transform AI-generated images within the same creative workspace." }
+    ],
+    results: [
+      "Unified multiple AI creative workflows into one platform",
+      "Reduced prompt creation time through reusable templates",
+      "Improved designer productivity with specialized AI tools",
+      "Created a scalable SaaS interface for future AI integrations"
+    ]
   },
-  {
-    id: "branding-portfolio",
-    title: "Multi-Brand Identity System",
-    category: "Brand Identity",
-    subtitle: "8 brands, 8 distinct personalities, one creative vision — strategic systems across weddings, hospitality, exports, and wellness",
-    heroColor: "from-pink-500/20 to-rose-500/20",
-    accentColor: "#ec4899",
-    gradientFrom: "from-pink-500",
-    gradientTo: "to-rose-500",
-    coverGradient: "from-pink-500/10 via-rose-500/5 to-transparent",
-    previewLabel: "Brand Portfolio",
-    story: "Eight brands operating under one parent company. Each targeting a completely different audience — brides-to-be, international travelers, cafe regulars, B2B buyers, wellness seekers. Each needed a distinct visual language. I designed complete identity systems for all of them: logos, palettes, typography, social templates, print collateral. Each brand feels unique. All of them feel intentional.",
-    problem: "Multiple businesses under one parent company had inconsistent or non-existent visual identities. No brand guidelines. Fragmented marketing materials. Weak recognition across the portfolio. Each brand targeted different audiences but there was no system to keep them distinct yet cohesive.",
-    solution: "Developed a systematic approach to brand creation. For each brand: a complete identity system — logo, color, typography, patterns, application guidelines — tailored to their specific audience and industry. Flexible enough for daily social media use. Rigorous enough to maintain consistency across every touchpoint.",
-    process: [
-      "Audited all 8+ brands for existing assets, audience profiles, and market positioning",
-      "Developed brand strategy — personality, voice, visual direction for each",
-      "Created logo systems with primary, secondary, and icon-only variations",
-      "Designed color palettes with primary, secondary, and accent per brand",
-      "Selected typography pairs matching each brand's personality",
-      "Built social media templates, business card systems, and brand guidelines",
-      "Rolled out across Instagram, Facebook, print, and websites"
-    ],
-    finalVisuals: [
-      "Valley Wedding Cars — Rose gold, deep burgundy, luxury serif",
-      "Tree of Life Cafe — Warm amber, terracotta, organic shapes, handcrafted",
-      "Valley Visa Services — Navy, gold, professional authority",
-      "Export of India — Cyan, teal, global motifs, modern reach",
-      "Furniture Hub — Warm neutrals, sage green, clean sophistication",
-      "Asian Bazaar — Vibrant jewel tones, pattern-rich, multicultural energy",
-      "Houseboat Holidays — Teal, emerald, water-inspired serenity",
-      "Bliss of Wellness — Soft pink, lavender, organic calm"
-    ],
-    technologies: ["Adobe Photoshop", "Figma", "Color Theory", "Typography Design", "Brand Strategy", "Social Media"],
-    impact: [
-      { metric: "8+", label: "Brand Identities" },
-      { metric: "100%", label: "Visual Consistency" },
-      { metric: "3x", label: "Content Efficiency" },
-      { metric: "Unified", label: "Parent Company Cohesion" }
-    ],
-    year: "2024 — Present",
-    role: "Brand Designer & Creative Director",
-    duration: "Ongoing"
-  },
-  {
-    id: "motion-graphics",
-    title: "Motion Graphics & Social Media",
-    category: "Motion",
-    subtitle: "Stopping the scroll with motion — festive campaigns, product reveals, and brand stories that drove 200%+ engagement",
-    heroColor: "from-emerald-500/20 to-teal-500/20",
-    accentColor: "#10b981",
-    gradientFrom: "from-emerald-500",
-    gradientTo: "to-teal-500",
-    coverGradient: "from-emerald-500/10 via-teal-500/5 to-transparent",
-    previewLabel: "Motion Portfolio",
-    story: "Social media is where brands come alive. Motion is what stops the scroll. I've produced animated content across multiple brands — festive campaign reels, product showcases, brand story videos, behind-the-scenes content. Each piece designed to capture attention in the first second while communicating the brand's essence.",
-    problem: "Brands were posting static content in an increasingly video-first landscape. Their feeds lacked the rhythm and energy to compete. They needed animated content that could tell stories quickly, showcase products dynamically, and maintain brand consistency across reels, stories, and feed posts.",
-    solution: "Established a motion workflow covering concept, storyboarding, animation, and sound design. Each piece built around a core narrative hook with brand-consistent visuals. Mobile-first, fast-paced, designed to stop the thumb.",
-    process: [
-      "Developed content calendars aligned with festive seasons, launches, and milestones",
-      "Scripted and storyboarded each piece — hook, narrative arc, call-to-action",
-      "Created motion templates for recurring content types",
-      "Animated festive reels for Diwali, Eid, wedding season, and New Year",
-      "Produced product showcase animations with smooth reveals and callouts",
-      "Edited brand story content with cinematic pacing and color grading",
-      "Optimized everything for mobile — vertical formats, captions, fast pacing"
-    ],
-    finalVisuals: [
-      "Festive campaign reels with animated typography and brand motifs",
-      "Product showcase animations with 360-degree reveals and feature highlights",
-      "Brand story montages blending product shots, lifestyle, and animated overlays",
-      "Instagram stories with motion-enhanced layouts and interactive elements",
-      "Animated logo intros and outros for consistent video signatures",
-      "Behind-the-scenes edits with cinematic color grading and sound design"
-    ],
-    technologies: ["Corel Video Studio Pro", "Adobe Photoshop", "After Effects", "Social Media Strategy", "Motion Design"],
-    impact: [
-      { metric: "200%", label: "Reel Engagement" },
-      { metric: "40%", label: "Follower Growth" },
-      { metric: "5+", label: "Brands Served" },
-      { metric: "Weekly", label: "Content Cadence" }
-    ],
-    year: "2024 — Present",
-    role: "Motion Designer & Content Strategist",
-    duration: "Ongoing"
-  }
 ];
 
 export const portfolioCategories = [
   "All",
   "Web",
   "Branding",
-  "Motion",
   "Graphics",
 ];
 
@@ -596,42 +505,6 @@ export const portfolioProjects: PortfolioProject[] = [
     color: "from-teal-500/20 to-emerald-500/20",
     featured: false,
     tags: ["Instagram", "Content Strategy", "Visual Design", "Brand Growth"],
-  },
-  {
-    title: "Tree of Life Cafe",
-    category: "Branding",
-    description: "Complete brand identity for a nature-inspired cafe — logo, menu, signage, Instagram kit, and booking app. All speaking the same warm visual language.",
-    color: "from-amber-500/20 to-orange-500/20",
-    featured: true,
-    tags: ["Brand Identity", "Menu Design", "Social Media", "Photography"],
-    caseStudyId: "tree-of-life-cafe",
-    story: "Translated the warmth of a physical cafe into a cohesive identity across print, digital, and social. 3x engagement lift.",
-    impact: [{ metric: "3x", label: "Engagement" }, { metric: "100%", label: "Consistency" }],
-    tools: ["Photoshop", "MidJourney", "Figma", "React", "Tailwind CSS"]
-  },
-  {
-    title: "Multi-Brand Identity System",
-    category: "Branding",
-    description: "8 brand identities under one studio — wedding luxury to wellness calm — each with its own personality, palette, and system.",
-    color: "from-pink-500/20 to-rose-500/20",
-    featured: true,
-    tags: ["Brand Identity", "Logo Design", "Color Theory", "Typography", "Guidelines"],
-    caseStudyId: "branding-portfolio",
-    story: "Shaped 8 unique brand personalities across weddings, hospitality, exports, and wellness. Each distinct. All intentional.",
-    impact: [{ metric: "8+", label: "Brands" }, { metric: "100%", label: "Consistency" }],
-    tools: ["Photoshop", "Figma", "Brand Strategy", "Typography Design", "Color Theory"]
-  },
-  {
-    title: "Motion Graphics & Reels",
-    category: "Motion",
-    description: "Branded motion content — festive campaigns, product reveals, brand stories — designed to stop the scroll and drive 200%+ engagement.",
-    color: "from-emerald-500/20 to-teal-500/20",
-    featured: true,
-    tags: ["Motion", "Video Production", "Social Media", "Animation"],
-    caseStudyId: "motion-graphics",
-    story: "Turned static feeds into motion-driven experiences. Festive campaigns, product reveals, brand storytelling that performed.",
-    impact: [{ metric: "200%", label: "Reel Engagement" }, { metric: "40%", label: "Growth" }],
-    tools: ["Corel Video Studio", "Photoshop", "After Effects", "Motion Design"]
   },
   {
     title: "E-Commerce Product Visuals",

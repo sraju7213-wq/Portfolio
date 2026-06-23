@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import { ExternalLink } from "lucide-react";
 import { brands } from "../data/content";
-import { staggerContainer, fadeUp, viewportOnce } from "./ui/animations";
 
 export default function Brands() {
   const doubled = [...brands, ...brands];

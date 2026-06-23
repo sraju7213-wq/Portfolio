@@ -1,36 +1,48 @@
+import { lazy, Suspense } from "react";
 import LenisProvider from "./components/LenisProvider";
-import CustomCursor from "./components/CustomCursor";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
-import About from "./components/About";
-import Brands from "./components/Brands";
-import Work from "./components/Work";
-import Contact from "./components/Contact";
-import Footer from "./components/Footer";
 import ScrollProgress from "./components/ScrollProgress";
 import LoadingScreen from "./components/LoadingScreen";
-import SvgNoiseBackground from "./components/SvgNoiseBackground";
-import BackToTop from "./components/BackToTop";
+
+const CustomCursor = lazy(() => import("./components/CustomCursor"));
+const SvgNoiseBackground = lazy(() => import("./components/SvgNoiseBackground"));
+const Work = lazy(() => import("./components/Work"));
+const About = lazy(() => import("./components/About"));
+const Brands = lazy(() => import("./components/Brands"));
+const Contact = lazy(() => import("./components/Contact"));
+const Footer = lazy(() => import("./components/Footer"));
+const BackToTop = lazy(() => import("./components/BackToTop"));
+const AccentPicker = lazy(() => import("./components/AccentPicker"));
 
 export default function App() {
   return (
     <LenisProvider>
-      <CustomCursor />
+      <Suspense fallback={null}>
+        <CustomCursor />
+      </Suspense>
       <div className="min-h-screen bg-bg-primary text-text-primary font-body antialiased relative">
         <LoadingScreen />
         <ScrollProgress />
-        <SvgNoiseBackground />
+        <Suspense fallback={null}>
+          <SvgNoiseBackground />
+        </Suspense>
         <div className="gradient-mesh" />
         <Navbar />
         <main>
           <Hero />
-          <Work />
-          <About />
-          <Brands />
-          <Contact />
+          <Suspense fallback={null}>
+            <Work />
+            <About />
+            <Brands />
+            <Contact />
+          </Suspense>
         </main>
-        <Footer />
-        <BackToTop />
+        <Suspense fallback={null}>
+          <Footer />
+          <BackToTop />
+          <AccentPicker />
+        </Suspense>
       </div>
     </LenisProvider>
   );
